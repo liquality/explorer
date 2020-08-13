@@ -1,18 +1,42 @@
 <template>
-  <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <div>
+    <DataViz class="mb-5" />
+
+    <h2 class="h5 mb-3 d-flex align-items-center">
+      Most recent swaps
+      <router-link to="/browse" class="small ml-3">Browse &rsaquo;</router-link>
+    </h2>
+
+    <OrderList :list="history" />
   </div>
 </template>
 
 <script>
-// @ is an alias to /src
-import HelloWorld from '@/components/HelloWorld.vue'
+import axios from 'axios'
+
+import OrderList from '@/components/OrderList.vue'
+import DataViz from '@/components/DataViz.vue'
 
 export default {
-  name: 'Home',
   components: {
-    HelloWorld
+    DataViz,
+    OrderList
+  },
+  data () {
+    return {
+      history: []
+    }
+  },
+  async created () {
+    const { data } = await axios('http://localhost:3030/api/dash/orders', {
+      params: {
+        start: 0,
+        limit: 10,
+        excludeStatus: ['QUOTE']
+      }
+    })
+
+    this.history = data.result
   }
 }
 </script>

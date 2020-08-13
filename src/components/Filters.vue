@@ -1,0 +1,152 @@
+<template>
+  <div class="toolbar">
+    <nav class="nav flex-column mb-3">
+      <span class="nav-link small">User</span>
+      <span :class="{
+        'nav-link': true,
+        active: status.includes('USER_FUNDED')
+      }" @click="setStatus('USER_FUNDED')">Funded</span>
+      <span :class="{
+        'nav-link d-flex align-items-center': true,
+        active: status.includes('USER_FUNDED_UNVERIFIED')
+      }" @click="setStatus('USER_FUNDED_UNVERIFIED')">Funded <small class="ml-2 text-muted">Pending</small></span>
+      <span :class="{
+        'nav-link': true,
+        active: status.includes('USER_CLAIMED')
+      }" @click="setStatus('USER_CLAIMED')">Claimed</span>
+    </nav>
+
+    <nav class="nav flex-column mb-3">
+      <span class="nav-link small">Agent</span>
+      <span :class="{
+        'nav-link': true,
+        active: status.includes('AGENT_FUNDED')
+      }" @click="setStatus('AGENT_FUNDED')">Funded</span>
+      <span :class="{
+        'nav-link d-flex align-items-center': true,
+        active: status.includes('AGENT_FUNDED_UNVERIFIED')
+      }" @click="setStatus('AGENT_FUNDED_UNVERIFIED')">Funded <small class="ml-2 text-muted">Pending</small></span>
+      <span :class="{
+        'nav-link': true,
+        active: status.includes('AGENT_CLAIMED')
+      }" @click="setStatus('AGENT_CLAIMED')">Claimed</span>
+      <span :class="{
+        'nav-link d-flex align-items-center': true,
+        active: status.includes('AGENT_CLAIMED_UNVERIFIED')
+      }" @click="setStatus('AGENT_CLAIMED_UNVERIFIED')">Claimed <small class="ml-2 text-muted">Pending</small></span>
+      <span :class="{
+        'nav-link': true,
+        active: status.includes('AGENT_REFUNDED')
+      }" @click="setStatus('AGENT_REFUNDED')">Refunded</span>
+      <span :class="{
+        'nav-link d-flex align-items-center': true,
+        active: status.includes('AGENT_REFUNDED_UNVERIFIED')
+      }" @click="setStatus('AGENT_REFUNDED_UNVERIFIED')">Refunded <small class="ml-2 text-muted">Pending</small></span>
+    </nav>
+
+    <nav class="nav flex-column mb-3">
+      <span class="nav-link small">From</span>
+      <span
+        v-for="market in markets" :key="market"
+        :class="{
+          'nav-link': true,
+          active: fromMarkets.includes(market)
+        }" @click="setMarket(market, 'from')">{{market}}</span>
+    </nav>
+
+    <nav class="nav flex-column mb-3">
+      <span class="nav-link small">To</span>
+      <span
+        v-for="market in markets" :key="market"
+        :class="{
+          'nav-link': true,
+          active: toMarkets.includes(market)
+        }" @click="setMarket(market, 'to')">{{market}}</span>
+    </nav>
+  </div>
+</template>
+
+<script>
+import axios from 'axios'
+
+export default {
+  data () {
+    return {
+      status: [
+        'AGENT_CLAIMED'
+      ],
+      fromMarkets: [],
+      toMarkets: [],
+      markets: []
+    }
+  },
+  async created () {
+    const { data } = await axios('http://localhost:3030/api/swap/assetinfo')
+
+    this.markets = data.map(data => data.code)
+    this.fromMarkets = [...this.markets]
+    this.toMarkets = [...this.markets]
+  },
+  methods: {
+    safeEmit () {
+      this.$emit('update', { status: this.status, from: this.fromMarkets, to: this.toMarkets })
+    },
+    setStatus (status) {
+      if (this.status.includes(status)) {
+        if (this.status.length > 1) {
+          this.status = this.status.filter(s => status !== s)
+        }
+      } else {
+        this.status.push(status)
+      }
+    },
+    setMarket (market, direction) {
+      const ref = direction === 'from' ? this.fromMarkets : this.toMarkets
+
+      if (ref.includes(market)) {
+        if (ref.length > 1) {
+          this[`${direction}Markets`] = ref.filter(s => market !== s)
+        }
+      } else {
+        ref.push(market)
+      }
+    }
+  },
+  watch: {
+    status: 'safeEmit',
+    fromMarkets: 'safeEmit',
+    toMarkets: 'safeEmit'
+  }
+}
+</script>
+
+<style lang="scss">
+.toolbar {
+  .nav-link.small {
+    text-transform: uppercase;
+    padding-bottom: 0;
+  }
+
+  .nav-link {
+    padding: 0.5rem 1rem;
+    @extend .text-muted;
+
+    &:not(.small) {
+      cursor: pointer;
+    }
+
+    &.active {
+      color: $primary!important;
+      background-color: transparent!important;
+      font-weight: 500;
+
+      &:after {
+        display: inline;
+        content: '✓';
+        margin-left: 5px;
+        font-size: 90%;
+      }
+    }
+  }
+}
+</style>
