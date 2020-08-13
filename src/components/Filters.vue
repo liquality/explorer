@@ -81,7 +81,7 @@ export default {
     }
   },
   async created () {
-    const { data } = await axios('http://localhost:3030/api/swap/assetinfo')
+    const { data } = await axios('https://liquality-dashboard.herokuapp.com/api/swap/assetinfo')
 
     this.markets = data.map(data => data.code)
     this.fromMarkets = [...this.markets]

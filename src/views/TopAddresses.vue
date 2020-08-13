@@ -90,7 +90,7 @@ export default {
       return Math.ceil((value / this.accumulate[type]) * 10000) / 100
     },
     async submit () {
-      const { data } = await axios('http://localhost:3030/api/dash/topAddresses', {
+      const { data } = await axios('https://liquality-dashboard.herokuapp.com/api/dash/topAddresses', {
         params: {
           sort: this.sort,
           page: this.page
@@ -99,7 +99,7 @@ export default {
 
       this.addresses = data.result
 
-      const { data: { result: accumulate } } = await axios('http://localhost:3030/api/dash/accumulate')
+      const { data: { result: accumulate } } = await axios('https://liquality-dashboard.herokuapp.com/api/dash/accumulate')
       this.accumulate = accumulate
     },
     printMarkets (markets) {

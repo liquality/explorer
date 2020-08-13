@@ -186,7 +186,7 @@ export default {
       this.diffActiveMarketVolume = (Math.ceil(((dataValue - compareValue) / compareValue) * 10000) / 100) || 0
     },
     async getData (range) {
-      const { data: { result: { stats: data } } } = await axios('http://localhost:3030/api/dash/stats', {
+      const { data: { result: { stats: data } } } = await axios('https://liquality-dashboard.herokuapp.com/api/dash/stats', {
         params: {
           start: getTime(range.start),
           end: getTime(range.end),

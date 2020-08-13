@@ -222,7 +222,7 @@ export default {
     }
   },
   async created () {
-    const { data } = await axios(`http://localhost:3030/api/swap/order/${this.orderId}`, {
+    const { data } = await axios(`https://liquality-dashboard.herokuapp.com/api/swap/order/${this.orderId}`, {
       params: {
         verbose: true
       }
@@ -262,7 +262,7 @@ export default {
     const addresses = new Set([data.toAddress, data.fromAddress].filter(a => !!a))
 
     const statsByAddresses = await Promise.all([...addresses].map(
-      address => axios('http://localhost:3030/api/dash/statsByAddress', { params: { address } }).then(response => response.data)
+      address => axios('https://liquality-dashboard.herokuapp.com/api/dash/statsByAddress', { params: { address } }).then(response => response.data)
     ))
 
     this.statsByAddresses = statsByAddresses.reduce((acc, obj) => {
@@ -270,7 +270,7 @@ export default {
       return acc
     }, {})
 
-    const { data: { result: fromUsdRate } } = await axios('http://localhost:3030/api/dash/usdRate', { params: { asset: data.from } })
+    const { data: { result: fromUsdRate } } = await axios('https://liquality-dashboard.herokuapp.com/api/dash/usdRate', { params: { asset: data.from } })
     this.latestFromUsdValue = this.formatUnitToCurrency(data.fromAmount, data.from) * fromUsdRate
     this.changeInUsdValue = Math.ceil(((this.latestFromUsdValue - data.fromUsdValue) / data.fromUsdValue) * 10000) / 100
   }

@@ -44,7 +44,7 @@ export default {
   },
   methods: {
     async search () {
-      const { data } = await axios('http://localhost:3030/api/dash/orders', {
+      const { data } = await axios('https://liquality-dashboard.herokuapp.com/api/dash/orders', {
         params: {
           q: this.address,
           start: 0,
