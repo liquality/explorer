@@ -45,6 +45,18 @@
     </nav>
 
     <nav class="nav flex-column mb-3">
+      <span class="nav-link small">User Agent</span>
+      <span :class="{
+        'nav-link': true,
+        active: userAgent.includes('WALLET')
+      }" @click="setUserAgent('WALLET')">Wallet</span>
+      <span :class="{
+        'nav-link': true,
+        active: userAgent.includes('UI')
+      }" @click="setUserAgent('UI')">UI</span>
+    </nav>
+
+    <nav class="nav flex-column mb-3">
       <span class="nav-link small">From</span>
       <span
         v-for="market in markets" :key="market"
@@ -75,6 +87,10 @@ export default {
       status: [
         'AGENT_CLAIMED'
       ],
+      userAgent: [
+        'WALLET',
+        'UI'
+      ],
       fromMarkets: [],
       toMarkets: [],
       markets: []
@@ -89,7 +105,7 @@ export default {
   },
   methods: {
     safeEmit () {
-      this.$emit('update', { status: this.status, from: this.fromMarkets, to: this.toMarkets })
+      this.$emit('update', { status: this.status, from: this.fromMarkets, to: this.toMarkets, userAgent: this.userAgent })
     },
     setStatus (status) {
       if (this.status.includes(status)) {
@@ -98,6 +114,15 @@ export default {
         }
       } else {
         this.status.push(status)
+      }
+    },
+    setUserAgent (userAgent) {
+      if (this.userAgent.includes(userAgent)) {
+        if (this.userAgent.length > 1) {
+          this.userAgent = this.userAgent.filter(s => userAgent !== s)
+        }
+      } else {
+        this.userAgent.push(userAgent)
       }
     },
     setMarket (market, direction) {
@@ -115,7 +140,8 @@ export default {
   watch: {
     status: 'safeEmit',
     fromMarkets: 'safeEmit',
-    toMarkets: 'safeEmit'
+    toMarkets: 'safeEmit',
+    userAgent: 'safeEmit'
   }
 }
 </script>
@@ -124,7 +150,6 @@ export default {
 .toolbar {
   .nav-link.small {
     text-transform: uppercase;
-    padding-bottom: 0;
   }
 
   .nav-link {

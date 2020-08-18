@@ -3,15 +3,25 @@
     <table class="table border bg-white mb-0">
       <thead>
         <tr>
-          <td scope="col" class="text-muted cursor-pointer" @click="setSort('createdAt')">
+          <td scope="col" :class="{
+            'text-muted': true,
+            'cursor-pointer': !noSort
+          }" @click="setSort('createdAt')">
             When
-            <span v-if="sort === 'createdAt'">&#8595;</span>
-            <span v-else-if="sort === '-createdAt'">&#8593;</span>
+            <span v-if="!noSort">
+              <span v-if="sort === 'createdAt'">&#8595;</span>
+              <span v-else-if="sort === '-createdAt'">&#8593;</span>
+            </span>
           </td>
-          <td scope="col" class="text-muted cursor-pointer" @click="setSort('fromUsdValue')">
+          <td scope="col" :class="{
+            'text-muted': true,
+            'cursor-pointer': !noSort
+          }" @click="setSort('fromUsdValue')">
             Value
-            <span v-if="sort === 'fromUsdValue'">&#8595;</span>
-            <span v-else-if="sort === '-fromUsdValue'">&#8593;</span>
+            <span v-if="!noSort">
+              <span v-if="sort === 'fromUsdValue'">&#8595;</span>
+              <span v-else-if="sort === '-fromUsdValue'">&#8593;</span>
+            </span>
           </td>
           <td scope="col" colspan="3" class="text-muted">Swap</td>
           <td scope="col" colspan="3" class="text-muted">Rate</td>
@@ -58,7 +68,7 @@
           </td>
           <td class="text-left">
             <router-link :to="'/order/' + item.orderId">
-              {{formatAmount(item.rate, 'USD')}} {{item.to}}
+              {{formatAssetValue(item.rate, item.to)}} {{item.to}}
             </router-link>
           </td>
           <td>
@@ -85,6 +95,9 @@ export default {
   props: {
     list: {
       type: Array
+    },
+    noSort: {
+      type: Boolean
     }
   },
   methods: {
@@ -92,6 +105,8 @@ export default {
       return Math.ceil(((from - to) / from) * 10000) / 100
     },
     setSort (sort) {
+      if (this.noSort) return
+
       if (this.sort === sort) this.sort = `-${sort}`
       else if (this.sort === `-${sort}`) this.sort = sort
       else this.sort = `-${sort}`

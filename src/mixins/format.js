@@ -36,6 +36,17 @@ export default {
 
       return cryptoassets[asset].unitToCurrency(value)
     },
+    formatAssetValue (value, asset, trim = false) {
+      asset = asset.toLowerCase()
+
+      if (trim) {
+        const prettyAmount = BN(value).dp(DP_PRETTY_MAP[asset.toUpperCase()], BN.ROUND_FLOOR)
+        const [n, d] = String(prettyAmount).split('.')
+        return coinFormatter.format(Number(n)) + (d ? `.${d}` : '')
+      }
+
+      return value
+    },
     formatAmount (value, asset, trim = false) {
       asset = asset.toLowerCase()
 

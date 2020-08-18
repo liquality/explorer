@@ -7,7 +7,7 @@
       <router-link to="/browse" class="small ml-3">Browse &rsaquo;</router-link>
     </h2>
 
-    <OrderList :list="history" />
+    <OrderList :list="history" noSort />
   </div>
 </template>
 

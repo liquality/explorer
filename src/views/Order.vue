@@ -7,9 +7,13 @@
           <div class="table-responsive">
             <table class="table bg-white m-0 table-order-details">
               <tbody class="font-weight-normal">
-                <tr v-if="order.fromAddress">
+                <tr>
                   <td class="text-muted text-right small-12">Order ID</td>
                   <td><router-link :to="'/order/' + order.orderId">{{order.orderId}}</router-link></td>
+                </tr>
+                <tr>
+                  <td class="text-muted text-right small-12">User Agent</td>
+                  <td>{{order.userAgent === 'wallet' ? 'Wallet' : 'UI'}}</td>
                 </tr>
                 <tr>
                   <td class="text-muted text-right small-12">Amount</td>
@@ -17,21 +21,35 @@
                     {{formatAmount(order.fromAmount, order.from)}} {{order.from}}
                     <span class="font-weight-bold text-muted mx-1">&rsaquo;</span>
                     {{formatAmount(order.toAmount, order.to)}} {{order.to}}
-                    <span class="text-muted mx-1">@</span>
-                    <span class="text-muted">1 {{order.from}} = {{formatAmount(order.rate, 'USD')}} {{order.to}}</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="text-muted text-right small-12">Rate</td>
+                  <td>
+                    1 {{order.from}} = {{formatAssetValue(order.rate, order.to)}} {{order.to}}
+                    <span v-if="latestMarketRate">
+                      <span class="text-muted mx-1">&rsaquo;</span>
+                      ${{formatAssetValue(latestMarketRate, order.to)}}
+                      <span class="ml-1" :class="{
+                        'text-danger': changeInMarketRate < 0,
+                        'text-success': changeInMarketRate >= 0
+                      }">{{changeInMarketRate}}%</span>
+                    </span>
                   </td>
                 </tr>
                 <tr>
                   <td class="text-muted text-right small-12">Value</td>
                   <td>
                     ${{formatAmount(order.fromUsdValue, 'USD')}}
-                    <span class="text-muted mx-1">&rsaquo;</span>
                     <span v-if="latestFromUsdValue">
-                      ${{formatAmount(latestFromUsdValue, 'USD')}}
-                      <span class="ml-1" :class="{
-                        'text-danger': changeInUsdValue < 0,
-                        'text-success': changeInUsdValue >= 0
-                      }">{{changeInUsdValue}}%</span>
+                      <span class="text-muted mx-1">&rsaquo;</span>
+                      <span>
+                        ${{formatAmount(latestFromUsdValue, 'USD')}}
+                        <span class="ml-1" :class="{
+                          'text-danger': changeInUsdValue < 0,
+                          'text-success': changeInUsdValue >= 0
+                        }">{{changeInUsdValue}}%</span>
+                      </span>
                     </span>
                   </td>
                 </tr>
@@ -116,7 +134,7 @@
           </div>
         </div>
       </div>
-      <div class="col-md-4">
+      <div class="col-md-4" v-if="auditLogs">
         <h2 class="h5 mb-4">Timeline</h2>
         <div class="order-timeline">
           <div class="card font-weight-normal" v-for="(audit, idx) in auditLogs" :key="audit._id">
@@ -171,8 +189,11 @@
               </div>
               <div class="mt-1 text-muted small d-block">
                 <time :datetime="audit.createdAt">{{formatDate(auditMap[audit.key].end)}}</time>
-                <span v-if="auditMap[audit.key].count > 1" class="ml-1">
-                  ({{auditMap[audit.key].count}} attempts, first attempt at {{formatDate(auditMap[audit.key].start)}}, took {{formatDuration(auditMap[audit.key].start, auditMap[audit.key].end, false)}})
+                <span v-if="rates"> ({{formatAssetValue(rates[auditMap[audit.key].end.getTime()], order.to)}})</span>
+                <br v-if="auditMap[audit.key].count > 1">
+                <span v-if="auditMap[audit.key].count > 1">
+                  First attempt at {{formatDate(auditMap[audit.key].start)}}<span v-if="rates"> ({{formatAssetValue(rates[auditMap[audit.key].start.getTime()], order.to)}})</span><br>
+                  {{auditMap[audit.key].count}} attempts, took {{formatDuration(auditMap[audit.key].start, auditMap[audit.key].end, false)}}
                 </span>
               </div>
             </div>
@@ -209,11 +230,14 @@ export default {
   data () {
     return {
       order: null,
-      auditLogs: [],
-      auditMap: {},
+      auditLogs: null,
+      auditMap: null,
       statsByAddresses: {},
       latestFromUsdValue: null,
-      changeInUsdValue: null
+      changeInUsdValue: null,
+      rates: null,
+      latestMarketRate: null,
+      changeInMarketRate: null
     }
   },
   computed: {
@@ -229,6 +253,7 @@ export default {
     })
 
     const auditMap = {}
+    const timestampSet = new Set()
 
     const auditLogs = data.audit_log.map(audit => {
       const key = `${audit.context}-${audit.orderStatus}-${audit.status}`
@@ -250,6 +275,9 @@ export default {
         auditMap[key].end = max([auditMap[key].end, new Date(audit.createdAt)])
       }
 
+      timestampSet.add(auditMap[key].start.getTime())
+      timestampSet.add(auditMap[key].end.getTime())
+
       auditMap[key].count++
 
       return audit
@@ -270,9 +298,37 @@ export default {
       return acc
     }, {})
 
-    const { data: { result: fromUsdRate } } = await axios('https://liquality-dashboard.herokuapp.com/api/dash/usdRate', { params: { asset: data.from } })
-    this.latestFromUsdValue = this.formatUnitToCurrency(data.fromAmount, data.from) * fromUsdRate
-    this.changeInUsdValue = Math.ceil(((this.latestFromUsdValue - data.fromUsdValue) / data.fromUsdValue) * 10000) / 100
+    const latestTimeStamp = auditLogs.length > 0
+      ? Object.entries(auditMap).sort((a, b) => b[1].end - a[1].end)[0][1].end
+      : (data.updatedAt || data.createdAt)
+
+    if (latestTimeStamp) {
+      const timestamp = new Date(latestTimeStamp).getTime()
+
+      const markets = [`${data.from}-USD`, `${data.from}-${data.to}`].map(market => {
+        return axios('https://liquality-dashboard.herokuapp.com/api/dash/rate', { params: { market, timestamp } })
+          .then(response => response.data.result)
+      })
+
+      const [fromUsdRate, marketRate] = await Promise.all(markets)
+
+      this.latestFromUsdValue = this.formatUnitToCurrency(data.fromAmount, data.from) * fromUsdRate
+      this.changeInUsdValue = Math.ceil(((this.latestFromUsdValue - data.fromUsdValue) / data.fromUsdValue) * 10000) / 100
+
+      this.latestMarketRate = marketRate
+      this.changeInMarketRate = Math.ceil(((marketRate - data.rate) / data.rate) * 10000) / 100
+    }
+
+    const rates = await Promise.all([...timestampSet].map(
+      timestamp => axios(
+        'https://liquality-dashboard.herokuapp.com/api/dash/rate', { params: { market: `${data.from}-${data.to}`, timestamp } }
+      ).then(response => ({ timestamp, rate: response.data.result }))
+    ))
+
+    this.rates = rates.reduce((acc, { timestamp, rate }) => {
+      acc[timestamp] = rate
+      return acc
+    }, {})
   }
 }
 </script>

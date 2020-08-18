@@ -9,7 +9,7 @@
           'font-weight-bold': range.label === r
         }" @click="updateRange(r)">{{r}}</button>
     </div>
-    <div class="row pb-3 justify-content-center">
+    <div class="row pb-4 justify-content-center">
       <div class="col-md-3">
         <div class="card">
           <div class="card-body">
@@ -62,18 +62,28 @@
         </div>
       </div>
     </div>
+
+    <h2 class="h5">Volume</h2>
+    <div class="card mb-4">
+      <div class="card-body">
+        <LineChart :chartData="lineChartData" :compareLabels="compareLabels" :height="300" />
+      </div>
+    </div>
+
     <div class="row justify-content-center">
-      <div class="col-md-8">
+      <div class="col-md-6">
+        <h2 class="h5">Markets</h2>
         <div class="card">
           <div class="card-body">
-            <LineChart :chartData="lineChartData" :compareLabels="compareLabels" :height="300" />
+            <BarChart :chartData="barChartData" :height="300" key="marketChart" />
           </div>
         </div>
       </div>
-      <div class="col-md-4">
+      <div class="col-md-6">
+        <h2 class="h5">User agents</h2>
         <div class="card">
           <div class="card-body">
-            <BarChart :chartData="barChartData" :height="300" />
+            <BarChart :chartData="walletChartData" :height="300" key="walletChart" />
           </div>
         </div>
       </div>
@@ -103,6 +113,7 @@ export default {
     return {
       lineChartData: {},
       barChartData: {},
+      walletChartData: {},
       range: {},
       totalUsdVolume: 0,
       totalCount: 0,
@@ -125,10 +136,29 @@ export default {
     async fillData () {
       const [data, compare] = await Promise.all([this.getData(this.range), this.getData(this.range.compare)])
 
+      if (data.barChart.labels.length <= 2) {
+        data.barChart.labels.push('')
+        data.barChart.values.push(0)
+      }
+
       this.barChartData = {
-        labels: data.barChart.labels,
+        labels: data.barChart.labels, // [...data.barChart.labels, ''],
         datasets: [{
-          data: data.barChart.values,
+          data: data.barChart.values, // [..., 0],
+          borderWidth: 2,
+          borderColor: '#243B53',
+          backgroundColor: '#243B53',
+          lineTension: 0,
+          pointRadius: 2,
+          pointBackgroundColor: '#243B53',
+          fill: true
+        }]
+      }
+
+      this.walletChartData = {
+        labels: data.walletUi.map(a => a[0]),
+        datasets: [{
+          data: data.walletUi.map(a => a[1]),
           borderWidth: 2,
           borderColor: '#243B53',
           backgroundColor: '#243B53',
@@ -148,8 +178,6 @@ export default {
           backgroundColor: 'transparent',
           lineTension: 0,
           pointRadius: 0
-          // pointBackgroundColor: 'transparent',
-          // fill: true
         }, {
           data: compare.lineChart.values,
           borderWidth: 2,
@@ -157,8 +185,6 @@ export default {
           backgroundColor: 'transparent',
           lineTension: 0,
           pointRadius: 0
-          // pointBackgroundColor: '#243a5233',
-          // fill: true
         }]
       }
 
@@ -197,7 +223,15 @@ export default {
       let totalCount = 0
       let totalUsdVolume = 0
 
-      const _barChart = data.reduce((acc, { markets }) => {
+      let walletCount = 0
+      let walletUsdVolume = 0
+
+      const _barChart = data.reduce((acc, { count, volume, wallet_count, wallet_volume, markets }) => { /* eslint-disable-line */
+        if (wallet_count) { /* eslint-disable-line */
+          walletCount += wallet_count /* eslint-disable-line */
+          walletUsdVolume += wallet_volume /* eslint-disable-line */
+        }
+
         Object.keys(markets).forEach(market => {
           if (!acc[market]) acc[market] = 0
           acc[market] += markets[market].usd_volume
@@ -220,10 +254,17 @@ export default {
         return acc
       }, { labels: [], values: [] })
 
+      const walletUi = [['Wallet', walletUsdVolume], ['UI', totalUsdVolume - walletUsdVolume]]
+
+      walletUi.sort((a, b) => b[1] - a[1])
+
       return {
         mostActiveMarket,
         totalCount,
         totalUsdVolume,
+        walletCount,
+        walletUsdVolume,
+        walletUi,
         barChart,
         lineChart: {
           labels: data.map(point => point.date),
