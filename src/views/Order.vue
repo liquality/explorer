@@ -99,7 +99,12 @@
                 <tr>
                   <td class="text-muted text-right small-12">Absolute Difference</td>
                   <td>
-                    ${{formatAmount(latestFromUsdValue - latestToUsdValue - (order.fromUsdValue - order.toUsdValue), 'USD')}}
+                    <span :class="{
+                      'text-danger': (latestFromUsdValue - latestToUsdValue - (order.fromUsdValue - order.toUsdValue)) < 0,
+                      'text-success': (latestFromUsdValue - latestToUsdValue - (order.fromUsdValue - order.toUsdValue)) >= 0
+                    }">
+                      ${{formatAmount(latestFromUsdValue - latestToUsdValue - (order.fromUsdValue - order.toUsdValue), 'USD')}}
+                    </span>
                   </td>
                 </tr>
                 <tr>
