@@ -68,12 +68,12 @@ export default {
       return amount
     },
     formatDuration (value, ref = new Date(), suffix = true) {
-      return formatDistance(new Date(value), ref, {
+      return formatDistance(new Date(value), new Date(ref), {
         addSuffix: suffix
       })
     },
     formatDurationStrict (value, ref = new Date(), suffix = true) {
-      return formatDistanceStrict(new Date(value), ref, {
+      return formatDistanceStrict(new Date(value), new Date(ref), {
         addSuffix: suffix
       })
     },
