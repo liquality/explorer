@@ -16,6 +16,14 @@
                   <td>{{order.userAgent === 'wallet' ? 'Wallet' : 'UI'}}</td>
                 </tr>
                 <tr>
+                  <td class="text-muted text-right small-12">Amount</td>
+                  <td>
+                    {{formatAmount(order.fromAmount, order.from, true)}} {{order.from}}
+                    <span class="font-weight-bold text-muted mx-1">&rsaquo;</span>
+                    {{formatAmount(order.toAmount, order.to, true)}} {{order.to}}
+                  </td>
+                </tr>
+                <tr>
                   <td class="text-muted text-right small-12">Time</td>
                   <td>
                     {{formatDate(order.createdAt)}}
@@ -24,14 +32,6 @@
                       {{formatDate(order.updatedAt)}}
                       <span class="ml-1 text-success">{{formatDurationStrict(order.createdAt, order.updatedAt, false)}}</span>
                     </span>
-                  </td>
-                </tr>
-                <tr>
-                  <td class="text-muted text-right small-12">Amount</td>
-                  <td>
-                    {{formatAmount(order.fromAmount, order.from)}} {{order.from}}
-                    <span class="font-weight-bold text-muted mx-1">&rsaquo;</span>
-                    {{formatAmount(order.toAmount, order.to)}} {{order.to}}
                   </td>
                 </tr>
                 <tr>
