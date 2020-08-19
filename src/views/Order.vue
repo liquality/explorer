@@ -19,9 +19,11 @@
                   <td class="text-muted text-right small-12">Time</td>
                   <td>
                     {{formatDate(order.createdAt)}}
-                    <span class="font-weight-bold text-muted mx-1">&rsaquo;</span>
-                    {{formatDate(order.updatedAt)}}
-                    <span class="ml-1 text-success">{{formatDurationStrict(order.createdAt, order.updatedAt, false)}}</span>
+                    <span v-if="!isEqual(order.createdAt, order.updatedAt) && order.updatedAt">
+                      <span class="font-weight-bold text-muted mx-1">&rsaquo;</span>
+                      {{formatDate(order.updatedAt)}}
+                      <span class="ml-1 text-success">{{formatDurationStrict(order.createdAt, order.updatedAt, false)}}</span>
+                    </span>
                   </td>
                 </tr>
                 <tr>

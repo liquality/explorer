@@ -1,4 +1,4 @@
-import { formatDistance, formatDistanceStrict, format } from 'date-fns'
+import { formatDistance, formatDistanceStrict, format, isEqual } from 'date-fns'
 import cryptoassets from '@liquality/cryptoassets'
 import BN from 'bignumber.js'
 
@@ -31,6 +31,7 @@ const EXPLORER_MAP = {
 
 export default {
   methods: {
+    isEqual,
     formatUnitToCurrency (value, asset) {
       asset = asset.toLowerCase()
 
