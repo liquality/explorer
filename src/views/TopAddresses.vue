@@ -42,7 +42,7 @@
               </router-link>
             </td>
             <td class="text-right">
-              <router-link :to="'/address/' + item.address">
+              <router-link :to="'/address/' + item.address" :title="item.markets.join(', ')">
                 {{printMarkets(item.markets)}}
               </router-link>
             </td>
