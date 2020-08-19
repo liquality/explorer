@@ -50,7 +50,7 @@
                   </td>
                 </tr>
                 <tr>
-                  <td class="text-muted text-right small-12">Value</td>
+                  <td class="text-muted text-right small-12">{{order.from}} Value</td>
                   <td>
                     ${{formatAmount(order.fromUsdValue, 'USD')}}
                     <span v-if="latestFromUsdValue">
@@ -58,9 +58,25 @@
                       <span>
                         ${{formatAmount(latestFromUsdValue, 'USD')}}
                         <span class="ml-1" :class="{
-                          'text-danger': changeInUsdValue < 0,
-                          'text-success': changeInUsdValue >= 0
-                        }">{{changeInUsdValue}}%</span>
+                          'text-danger': changeInFromUsdValue < 0,
+                          'text-success': changeInFromUsdValue >= 0
+                        }">{{changeInFromUsdValue}}%</span>
+                      </span>
+                    </span>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="text-muted text-right small-12">{{order.to}} Value</td>
+                  <td>
+                    ${{formatAmount(order.toUsdValue, 'USD')}}
+                    <span v-if="latestToUsdValue">
+                      <span class="text-muted mx-1">&rsaquo;</span>
+                      <span>
+                        ${{formatAmount(latestToUsdValue, 'USD')}}
+                        <span class="ml-1" :class="{
+                          'text-danger': changeInToUsdValue < 0,
+                          'text-success': changeInToUsdValue >= 0
+                        }">{{changeInToUsdValue}}%</span>
                       </span>
                     </span>
                   </td>
@@ -248,7 +264,9 @@ export default {
       auditMap: null,
       statsByAddresses: {},
       latestFromUsdValue: null,
-      changeInUsdValue: null,
+      latestToUsdValue: null,
+      changeInFromUsdValue: null,
+      changeInToUsdValue: null,
       rates: null,
       latestMarketRate: null,
       changeInMarketRate: null
@@ -319,15 +337,18 @@ export default {
     if (latestTimeStamp) {
       const timestamp = new Date(latestTimeStamp).getTime()
 
-      const markets = [`${data.from}-USD`, `${data.from}-${data.to}`].map(market => {
+      const markets = [`${data.from}-USD`, `${data.to}-USD`, `${data.from}-${data.to}`].map(market => {
         return axios('https://liquality-dashboard.herokuapp.com/api/dash/rate', { params: { market, timestamp } })
           .then(response => response.data.result)
       })
 
-      const [fromUsdRate, marketRate] = await Promise.all(markets)
+      const [fromUsdRate, toUsdRate, marketRate] = await Promise.all(markets)
 
       this.latestFromUsdValue = this.formatUnitToCurrency(data.fromAmount, data.from) * fromUsdRate
-      this.changeInUsdValue = Math.ceil(((this.latestFromUsdValue - data.fromUsdValue) / data.fromUsdValue) * 10000) / 100
+      this.changeInFromUsdValue = Math.ceil(((this.latestFromUsdValue - data.fromUsdValue) / data.fromUsdValue) * 10000) / 100
+
+      this.latestToUsdValue = this.formatUnitToCurrency(data.toAmount, data.to) * toUsdRate
+      this.changeInToUsdValue = Math.ceil(((this.latestToUsdValue - data.toUsdValue) / data.toUsdValue) * 10000) / 100
 
       this.latestMarketRate = marketRate
       this.changeInMarketRate = Math.ceil(((marketRate - data.rate) / data.rate) * 10000) / 100
