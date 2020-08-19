@@ -97,6 +97,12 @@
                   </td>
                 </tr>
                 <tr>
+                  <td class="text-muted text-right small-12">Absolute Difference</td>
+                  <td>
+                    ${{formatAmount(latestFromUsdValue - latestToUsdValue - (order.fromUsdValue - order.toUsdValue), 'USD')}}
+                  </td>
+                </tr>
+                <tr>
                   <td class="text-muted text-right small-12">Status</td>
                   <td>{{order.status}}</td>
                 </tr>
