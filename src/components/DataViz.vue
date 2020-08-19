@@ -5,6 +5,7 @@
         <VueCtkDateTimePicker
           v-model="date"
           range
+          formatted="D MMM YYYY"
           label="Select date range"
           color="#334E68"
           buttonColor="#334E68"
