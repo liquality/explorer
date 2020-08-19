@@ -29,7 +29,7 @@
                     1 {{order.from}} = {{formatAssetValue(order.rate, order.to)}} {{order.to}}
                     <span v-if="latestMarketRate">
                       <span class="text-muted mx-1">&rsaquo;</span>
-                      ${{formatAssetValue(latestMarketRate, order.to)}}
+                      {{formatAssetValue(latestMarketRate, order.to)}}
                       <span class="ml-1" :class="{
                         'text-danger': changeInMarketRate < 0,
                         'text-success': changeInMarketRate >= 0
