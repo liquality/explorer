@@ -94,11 +94,7 @@
                       'text-danger': percProfit(latestFromUsdValue, latestToUsdValue) < 0,
                       'text-success': percProfit(latestFromUsdValue, latestToUsdValue) >= 0
                     }">${{formatAmount(latestFromUsdValue - latestToUsdValue, 'USD')}} ({{percProfit(latestFromUsdValue, latestToUsdValue)}}%)</span>
-                  </td>
-                </tr>
-                <tr>
-                  <td class="text-muted text-right small-12">Absolute Difference</td>
-                  <td>
+                    <span class="text-muted mx-2">&rsaquo;</span>
                     <span :class="{
                       'text-danger': (latestFromUsdValue - latestToUsdValue - (order.fromUsdValue - order.toUsdValue)) < 0,
                       'text-success': (latestFromUsdValue - latestToUsdValue - (order.fromUsdValue - order.toUsdValue)) >= 0
