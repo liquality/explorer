@@ -88,12 +88,12 @@
                     <span :class="{
                       'text-danger': percProfit(order.fromUsdValue, order.toUsdValue) < 0,
                       'text-success': percProfit(order.fromUsdValue, order.toUsdValue) >= 0
-                    }">{{percProfit(order.fromUsdValue, order.toUsdValue)}}%</span>
+                    }">${{formatAmount(order.fromUsdValue - order.toUsdValue, 'USD')}} ({{percProfit(order.fromUsdValue, order.toUsdValue)}}%)</span>
                     <span class="text-muted mx-2">&rsaquo;</span>
                     <span :class="{
                       'text-danger': percProfit(latestFromUsdValue, latestToUsdValue) < 0,
                       'text-success': percProfit(latestFromUsdValue, latestToUsdValue) >= 0
-                    }">{{percProfit(latestFromUsdValue, latestToUsdValue)}}%</span>
+                    }">${{formatAmount(latestFromUsdValue - latestToUsdValue, 'USD')}} ({{percProfit(latestFromUsdValue, latestToUsdValue)}}%)</span>
                   </td>
                 </tr>
                 <tr>
