@@ -73,12 +73,27 @@
                       <span class="text-muted mx-1">&rsaquo;</span>
                       <span>
                         ${{formatAmount(latestToUsdValue, 'USD')}}
-                        <span class="ml-1" :class="{
+                        <span :class="{
+                          'ml-1': true,
                           'text-danger': changeInToUsdValue < 0,
                           'text-success': changeInToUsdValue >= 0
                         }">{{changeInToUsdValue}}%</span>
                       </span>
                     </span>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="text-muted text-right small-12">USD Difference</td>
+                  <td>
+                    <span :class="{
+                      'text-danger': percProfit(order.fromUsdValue, order.toUsdValue) < 0,
+                      'text-success': percProfit(order.fromUsdValue, order.toUsdValue) >= 0
+                    }">{{percProfit(order.fromUsdValue, order.toUsdValue)}}%</span>
+                    <span class="text-muted mx-2">&rsaquo;</span>
+                    <span :class="{
+                      'text-danger': percProfit(latestFromUsdValue, latestToUsdValue) < 0,
+                      'text-success': percProfit(latestFromUsdValue, latestToUsdValue) >= 0
+                    }">{{percProfit(latestFromUsdValue, latestToUsdValue)}}%</span>
                   </td>
                 </tr>
                 <tr>
@@ -275,6 +290,11 @@ export default {
   computed: {
     orderId () {
       return this.$route.params.orderId
+    }
+  },
+  methods: {
+    percProfit (from, to) {
+      return Math.ceil(((from - to) / from) * 10000) / 100
     }
   },
   async created () {
