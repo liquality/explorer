@@ -1,13 +1,27 @@
 <template>
   <div>
-    <div class="pb-2 text-center">
-      <button
-        v-for="r in rangeOptions" :key="r"
-        type="button" :class="{
-          'btn btn-sm btn-link': true,
-          'text-muted': range.label !== r,
-          'font-weight-bold': range.label === r
-        }" @click="updateRange(r)">{{r}}</button>
+    <div class="row pb-4 justify-content-center">
+      <div class="col-md-6">
+        <VueCtkDateTimePicker
+          v-model="date"
+          range
+          label="Select date range"
+          color="#334E68"
+          buttonColor="#334E68"
+          :customShortcuts="[
+            { key: 'today', label: 'Today', value: 'day' },
+            { key: 'yesterday', label: 'Yesterday', value: '-day' },
+            { key: 'thisWeek', label: 'This week', value: 'isoWeek' },
+            { key: 'lastWeek', label: 'Last week', value: '-isoWeek' },
+            { key: 'last7Days', label: 'Last 7 days', value: 7 },
+            { key: 'last30Days', label: 'Last 30 days', value: 30 },
+            { key: 'thisMonth', label: 'This month', value: 'month' },
+            { key: 'lastMonth', label: 'Last month', value: '-month' },
+            { key: 'thisYear', label: 'This year', value: 'year' },
+            { key: 'lastYear', label: 'Last year', value: '-year' }
+          ]"
+          @validate="fillData" />
+      </div>
     </div>
     <div class="row pb-4 justify-content-center">
       <div class="col-md-3">
@@ -110,7 +124,9 @@
 
 <script>
 import axios from 'axios'
-import { getTime, startOfDay, endOfDay, startOfMonth, lastDayOfMonth, subMonths, subDays, subHours, startOfYear, lastDayOfYear, min, subYears, getDaysInMonth } from 'date-fns'
+import { getTime, subDays, differenceInDays } from 'date-fns'
+import VueCtkDateTimePicker from 'vue-ctk-date-time-picker'
+import 'vue-ctk-date-time-picker/dist/vue-ctk-date-time-picker.css'
 
 import formatMixin from '@/mixins/format'
 
@@ -123,15 +139,16 @@ export default {
   ],
   components: {
     LineChart,
-    BarChart
+    BarChart,
+    VueCtkDateTimePicker
   },
   props: ['address'],
   data () {
     return {
+      date: null,
       lineChartData: {},
       barChartData: {},
       walletChartData: {},
-      range: {},
       totalUsdVolume: 0,
       totalCount: 0,
       mostActiveMarket: null,
@@ -144,12 +161,31 @@ export default {
     }
   },
   computed: {
-    rangeOptions () {
-      return ['24h', '7d', '15d', '30d', 'this month', 'last month', 'this year']
+    range () {
+      const start = new Date(this.date.start)
+      const end = new Date(this.date.end)
+      const days = differenceInDays(new Date(end), new Date(start)) + 1
+
+      return {
+        start: start,
+        end: end,
+        compare: {
+          start: subDays(start, days),
+          end: subDays(end, days)
+        }
+      }
     }
   },
-  async mounted () {
-    this.updateRange('30d')
+  async created () {
+    const now = new Date()
+
+    this.date = {
+      start: subDays(now, 30),
+      end: now,
+      shortcut: 30
+    }
+
+    this.fillData()
   },
   methods: {
     async fillData () {
@@ -293,134 +329,6 @@ export default {
           values: data.map(point => point.usd_volume)
         }
       }
-    },
-    updateRange (label) {
-      let today = new Date()
-
-      switch (label) {
-        case '24h':
-          {
-            const start = subHours(today, 24)
-            const end = today
-
-            this.range = {
-              label,
-              start: subHours(today, 24),
-              end: today,
-              compare: {
-                start: subHours(start, 24),
-                end: subHours(end, 24)
-              }
-            }
-          }
-          break
-
-        case '7d':
-          {
-            const start = startOfDay(subDays(today, 7))
-            const end = endOfDay(today)
-
-            this.range = {
-              label,
-              start,
-              end,
-              compare: {
-                start: subDays(start, 7),
-                end: subDays(end, 7)
-              }
-            }
-          }
-          break
-
-        case '15d':
-          {
-            const start = startOfDay(subDays(today, 15))
-            const end = endOfDay(today)
-
-            this.range = {
-              label,
-              start,
-              end,
-              compare: {
-                start: subDays(start, 15),
-                end: subDays(end, 15)
-              }
-            }
-          }
-          break
-
-        case '30d':
-          {
-            const start = startOfDay(subDays(today, 30))
-            const end = endOfDay(today)
-
-            this.range = {
-              label,
-              start,
-              end,
-              compare: {
-                start: subDays(start, 30),
-                end: subDays(end, 30)
-              }
-            }
-          }
-          break
-
-        case 'this month':
-          {
-            const start = startOfMonth(today)
-            const end = min([endOfDay(lastDayOfMonth(today)), endOfDay(today)])
-
-            this.range = {
-              label,
-              start,
-              end,
-              compare: {
-                start: subDays(start, getDaysInMonth(start)),
-                end: subDays(end, getDaysInMonth(end))
-              }
-            }
-          }
-          break
-
-        case 'last month':
-          {
-            today = subMonths(today, 1)
-
-            const start = startOfMonth(today)
-            const end = endOfDay(lastDayOfMonth(today))
-
-            this.range = {
-              label,
-              start,
-              end,
-              compare: {
-                start: subDays(start, getDaysInMonth(start)),
-                end: subDays(end, getDaysInMonth(end))
-              }
-            }
-          }
-          break
-
-        case 'this year':
-          {
-            const start = startOfYear(today)
-            const end = min([endOfDay(lastDayOfYear(today)), endOfDay(today)])
-
-            this.range = {
-              label,
-              start,
-              end,
-              compare: {
-                start: subYears(start, 1),
-                end: subYears(end, 1)
-              }
-            }
-          }
-          break
-      }
-
-      this.fillData()
     }
   }
 }
