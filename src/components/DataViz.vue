@@ -48,6 +48,23 @@
         <div class="card">
           <div class="card-body">
             <h6 class="mb-3 font-weight-light text-muted d-flex justify-content-between align-items-center">
+              <span>Average Value</span>
+              <span :class="{
+                'font-weight-normal': true,
+                'text-danger': diffAverageOrderValue < 0,
+                'text-success': diffAverageOrderValue >= 0
+              }">{{diffAverageOrderValue}}%</span>
+            </h6>
+            <p class="h3 font-weight-light mb-0">
+              ${{formatAmount(averageOrderValue, 'USD')}}
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3" v-if="mostActiveMarket">
+        <div class="card">
+          <div class="card-body">
+            <h6 class="mb-3 font-weight-light text-muted d-flex justify-content-between align-items-center">
               <span>Top Market</span>
               <span :class="{
                 'font-weight-normal': true,
@@ -121,7 +138,9 @@ export default {
       compareLabels: [],
       diffUsdVolume: 0,
       diffTotalCount: 0,
-      diffActiveMarketVolume: 0
+      diffActiveMarketVolume: 0,
+      averageOrderValue: 0,
+      diffAverageOrderValue: 0
     }
   },
   computed: {
@@ -191,7 +210,9 @@ export default {
       this.compareLabels = compare.lineChart.labels
       this.totalUsdVolume = data.totalUsdVolume
       this.totalCount = data.totalCount
+      this.averageOrderValue = data.averageOrderValue
 
+      this.diffAverageOrderValue = (Math.ceil(((data.averageOrderValue - compare.averageOrderValue) / compare.averageOrderValue) * 10000) / 100) || 0
       this.diffUsdVolume = (Math.ceil(((data.totalUsdVolume - compare.totalUsdVolume) / compare.totalUsdVolume) * 10000) / 100) || 0
       this.diffTotalCount = (Math.ceil(((data.totalCount - compare.totalCount) / compare.totalCount) * 10000) / 100) || 0
 
@@ -262,6 +283,7 @@ export default {
         mostActiveMarket,
         totalCount,
         totalUsdVolume,
+        averageOrderValue: totalUsdVolume / totalCount,
         walletCount,
         walletUsdVolume,
         walletUi,
