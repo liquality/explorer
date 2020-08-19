@@ -206,7 +206,7 @@
                   <br v-if="auditMap[audit.key].count > 1">
                   <span v-if="auditMap[audit.key].count > 1">
                     First attempt at {{formatDate(auditMap[audit.key].start)}}<span v-if="rates"> ({{formatAssetValue(rates[auditMap[audit.key].start.getTime()], order.to)}})</span><br>
-                    {{auditMap[audit.key].count}} attempts, took {{formatDuration(auditMap[audit.key].start, auditMap[audit.key].end, false)}}
+                    {{auditMap[audit.key].count}} attempts, took {{formatDurationStrict(auditMap[audit.key].start, auditMap[audit.key].end, false)}}
                   </span>
                 </div>
               </div>
