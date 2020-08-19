@@ -73,7 +73,8 @@
           </td>
           <td>
             <router-link :to="'/order/' + item.orderId">
-              {{item.status}}
+              {{item.status}}<br>
+              <small class="text-muted">{{formatDurationStrict(item.createdAt, item.updatedAt, false)}}</small>
             </router-link>
           </td>
         </tr>
