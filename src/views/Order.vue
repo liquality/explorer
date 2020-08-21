@@ -179,6 +179,12 @@
                     <a :href="formatTxHashLink(order.toRefundHash, order.to)" target="_blank" rel="noopener">{{formatTxHash(order.toRefundHash, order.to)}}</a>
                   </td>
                 </tr>
+                <tr>
+                  <td class="text-muted text-right small-12">Actions</td>
+                  <td>
+                    <a :href="recoveryLink" target="_blank" rel="noopener">Swap Link</a>
+                  </td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -264,6 +270,7 @@
 
 <script>
 import axios from 'axios'
+import qs from 'qs'
 import { min, max, isEqual } from 'date-fns'
 
 import Check from '@/components/Icons/Check.vue'
@@ -297,6 +304,28 @@ export default {
   computed: {
     orderId () {
       return this.$route.params.orderId
+    },
+    recoveryLink () {
+      const urlParams = {
+        ccy1: this.order.from.toLowerCase(),
+        ccy1v: this.formatUnitToCurrency(this.order.fromAmount, this.order.from).toNumber(),
+        ccy1Addr: this.order.fromAddress,
+        ccy1CounterPartyAddr: this.order.fromCounterPartyAddress,
+
+        ccy2: this.order.to.toLowerCase(),
+        ccy2v: this.formatUnitToCurrency(this.order.toAmount, this.order.to).toNumber(),
+        ccy2Addr: this.order.toAddress,
+        ccy2CounterPartyAddr: this.order.toCounterPartyAddress,
+
+        aFundHash: this.order.fromFundHash,
+        bFundHash: this.order.toFundHash,
+
+        secretHash: this.order.secretHash,
+        expiration: this.order.swapExpiration,
+        isPartyB: false
+      }
+
+      return `https://liquality.io/swap/#${qs.stringify(urlParams)}`
     }
   },
   methods: {
