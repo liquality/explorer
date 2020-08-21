@@ -180,9 +180,29 @@
                   </td>
                 </tr>
                 <tr>
-                  <td class="text-muted text-right small-12">Actions</td>
+                  <td class="text-muted text-right small-12">Recovery Options</td>
                   <td>
-                    <a :href="recoveryLink" target="_blank" rel="noopener">Swap Link</a>
+                    <details v-if="order.userAgent === 'wallet'">
+                      <summary>Recovery Code</summary>
+                      <pre class="mt-3"><code class="p-0">chrome.storage.local.get(['liquality-wallet'], function(result) {
+    const missingOrder = {{JSON.stringify(recoveryCode, null, 4)}}
+    const data = result['liquality-wallet']
+
+    missingOrder.walletId = data.activeWalletId
+
+    if(!data.history.mainnet) {
+      data.history.mainnet = {}
+      data.history.mainnet[data.activeWalletId] = []
+    }
+
+    data.history.mainnet[data.activeWalletId].push(missingOrder)
+
+    chrome.storage.local.set({ 'liquality-wallet': data }, function() {
+      console.log(`Missing order ${missingOrder.id} added`)
+    })
+  })</code></pre>
+                    </details>
+                    <a v-else :href="recoveryLink" target="_blank" rel="noopener">Recovery Link</a>
                   </td>
                 </tr>
               </tbody>
@@ -306,26 +326,69 @@ export default {
       return this.$route.params.orderId
     },
     recoveryLink () {
+      const { order } = this
+
       const urlParams = {
-        ccy1: this.order.from.toLowerCase(),
-        ccy1v: this.formatUnitToCurrency(this.order.fromAmount, this.order.from).toNumber(),
-        ccy1Addr: this.order.fromAddress,
-        ccy1CounterPartyAddr: this.order.fromCounterPartyAddress,
+        ccy1: order.from.toLowerCase(),
+        ccy1v: this.formatUnitToCurrency(order.fromAmount, order.from).toNumber(),
+        ccy1Addr: order.fromAddress,
+        ccy1CounterPartyAddr: order.fromCounterPartyAddress,
 
-        ccy2: this.order.to.toLowerCase(),
-        ccy2v: this.formatUnitToCurrency(this.order.toAmount, this.order.to).toNumber(),
-        ccy2Addr: this.order.toAddress,
-        ccy2CounterPartyAddr: this.order.toCounterPartyAddress,
+        ccy2: order.to.toLowerCase(),
+        ccy2v: this.formatUnitToCurrency(order.toAmount, order.to).toNumber(),
+        ccy2Addr: order.toAddress,
+        ccy2CounterPartyAddr: order.toCounterPartyAddress,
 
-        aFundHash: this.order.fromFundHash,
-        bFundHash: this.order.toFundHash,
+        aFundHash: order.fromFundHash,
+        bFundHash: order.toFundHash,
 
-        secretHash: this.order.secretHash,
-        expiration: this.order.swapExpiration,
+        secretHash: order.secretHash,
+        expiration: order.swapExpiration,
         isPartyB: false
       }
 
       return `https://liquality.io/swap/#${qs.stringify(urlParams)}`
+    },
+    recoveryCode () {
+      const { order } = this
+
+      return {
+        id: order.orderId,
+        orderId: order.orderId,
+        createdAt: order.createdAt,
+        updatedAt: order.updatedAt,
+        agent: 'https://liquality.io/swap/agent',
+        auto: false,
+
+        expiresAt: order.expiresAt,
+
+        from: order.from,
+        to: order.to,
+
+        fromAddress: order.fromAddress,
+        toAddress: order.toAddress,
+
+        fromCounterPartyAddress: order.fromCounterPartyAddress,
+        toCounterPartyAddress: order.toCounterPartyAddress,
+
+        rate: order.rate,
+        fromAmount: order.fromAmount,
+        toAmount: order.toAmount,
+
+        fromFundHash: order.fromFundHash,
+        secretHash: order.secretHash,
+
+        minConf: order.minConf,
+        network: 'mainnet',
+        swapExpiration: order.swapExpiration,
+        nodeSwapExpiration: order.nodeSwapExpiration,
+        sendTo: null,
+        startTime: (new Date(order.createdAt)).getTime() - 10000,
+        status: 'GET_REFUND',
+        type: 'SWAP',
+        userAgent: 'wallet',
+        waitingForLock: false
+      }
     }
   },
   methods: {
