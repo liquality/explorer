@@ -11,7 +11,8 @@ const DP_PRETTY_MAP = {
   DAI: 6,
   USDC: 6,
   USDT: 6,
-  WBTC: 6
+  WBTC: 6,
+  UNI: 6
 }
 
 const EXPLORER_MAP = {
