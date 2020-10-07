@@ -198,7 +198,7 @@
     data.history.mainnet[data.activeWalletId].push(missingOrder)
 
     chrome.storage.local.set({ 'liquality-wallet': data }, function() {
-      console.log(`Missing order ${missingOrder.id} added`)
+      chrome.runtime.reload()
     })
   })</code></pre>
                     </details>
