@@ -195,6 +195,8 @@
       data.history.mainnet[data.activeWalletId] = []
     }
 
+    data.history.mainnet[data.activeWalletId] = data.history.mainnet[data.activeWalletId]
+      .filter(order => order.orderId !== missingOrder.orderId)
     data.history.mainnet[data.activeWalletId].push(missingOrder)
 
     chrome.storage.local.set({ 'liquality-wallet': data }, function() {
