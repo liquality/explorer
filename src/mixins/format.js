@@ -1,4 +1,4 @@
-import { formatDistance, formatDistanceStrict, format, isEqual } from 'date-fns'
+import { formatDistance, formatDistanceStrict, format, isEqual, parseISO as parseISOMain } from 'date-fns'
 import cryptoassets from '@liquality/cryptoassets'
 import BN from 'bignumber.js'
 
@@ -15,14 +15,19 @@ const DP_PRETTY_MAP = {
   UNI: 6
 }
 
+function parseISO (value) {
+  if (value instanceof Date) return value
+  return parseISOMain(value)
+}
+
 const EXPLORER_MAP = {
-  btc: {
+  BTC: {
     tx: 'https://blockstream.info/tx/',
     address: 'https://blockstream.info/address/',
     block: 'https://blockstream.info/block/',
     formatter: value => value
   },
-  eth: {
+  ETH: {
     tx: 'https://etherscan.io/tx/',
     address: 'https://etherscan.io/address/',
     block: 'https://etherscan.io/block/',
@@ -32,17 +37,16 @@ const EXPLORER_MAP = {
 
 export default {
   methods: {
-    isEqual,
+    isEqual (a, b) {
+      return isEqual(parseISO(a), parseISO(b))
+    },
+    parseISO,
     formatUnitToCurrency (value, asset) {
-      asset = asset.toLowerCase()
-
       return cryptoassets[asset].unitToCurrency(value)
     },
     formatAssetValue (value, asset, trim = false) {
-      asset = asset.toLowerCase()
-
       if (trim) {
-        const prettyAmount = BN(value).dp(DP_PRETTY_MAP[asset.toUpperCase()], BN.ROUND_FLOOR)
+        const prettyAmount = BN(value).dp(DP_PRETTY_MAP[asset], BN.ROUND_FLOOR)
         const [n, d] = String(prettyAmount).split('.')
         return coinFormatter.format(Number(n)) + (d ? `.${d}` : '')
       }
@@ -50,9 +54,7 @@ export default {
       return value
     },
     formatAmount (value, asset, trim = false) {
-      asset = asset.toLowerCase()
-
-      if (asset === 'usd') {
+      if (asset === 'USD') {
         const amount = usdFormatter.format(value)
 
         const [n, d] = String(amount).split('.')
@@ -62,7 +64,7 @@ export default {
       const amount = cryptoassets[asset].unitToCurrency(value)
 
       if (trim) {
-        const prettyAmount = BN(amount).dp(DP_PRETTY_MAP[asset.toUpperCase()], BN.ROUND_FLOOR)
+        const prettyAmount = BN(amount).dp(DP_PRETTY_MAP[asset], BN.ROUND_FLOOR)
         const [n, d] = String(prettyAmount).split('.')
         return coinFormatter.format(Number(n)) + (d ? `.${d}` : '')
       }
@@ -70,28 +72,32 @@ export default {
       return amount
     },
     formatDuration (value, ref = new Date(), suffix = true) {
-      return formatDistance(new Date(value), new Date(ref), {
+      return formatDistance(parseISO(value), parseISO(ref), {
         addSuffix: suffix
       })
     },
     formatDurationStrict (value, ref = new Date(), suffix = true) {
-      return formatDistanceStrict(new Date(value), new Date(ref), {
+      return formatDistanceStrict(parseISO(value), parseISO(ref), {
         addSuffix: suffix
       })
     },
     formatDate (value) {
-      return format(new Date(value), 'd MMM yyyy p')
+      return format(parseISO(value), 'd MMM yyyy p')
     },
     formatAddress (address, asset) {
-      return cryptoassets[asset.toLowerCase()].formatAddress(address)
+      return cryptoassets[asset].formatAddress(address)
     },
     formatTxHash (txHash, asset) {
-      const obj = EXPLORER_MAP[asset.toLowerCase()] || EXPLORER_MAP.eth
+      const obj = EXPLORER_MAP[asset] || EXPLORER_MAP.ETH
       return obj.formatter(txHash)
     },
     formatTxHashLink (txHash, asset) {
-      const obj = EXPLORER_MAP[asset.toLowerCase()] || EXPLORER_MAP.eth
+      const obj = EXPLORER_MAP[asset] || EXPLORER_MAP.ETH
       return obj.tx + obj.formatter(txHash)
+    },
+    formatBlockLink (block, asset) {
+      const obj = EXPLORER_MAP[asset] || EXPLORER_MAP.ETH
+      return obj.block + obj.formatter(block)
     },
     formatPlural (number, singular, plural) {
       return number === 1 ? singular : plural

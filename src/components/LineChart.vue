@@ -7,12 +7,14 @@ import formatMixin from '@/mixins/format'
 export default {
   extends: Line,
   mixins: [mixins.reactiveProp, formatMixin],
-  props: ['compareLabels'],
+  props: ['compareLabels', 'usd'],
   mounted () {
     this.renderChart(this.chartData, this.options)
   },
   computed: {
     options () {
+      const ref = this
+
       return {
         maintainAspectRatio: false,
         legend: {
@@ -58,7 +60,9 @@ export default {
             },
             ticks: {
               autoSkipPadding: 80,
-              callback: value => `${value / 1000}K`
+              callback: value => {
+                return `${ref.usd ? (value / 1000) + 'K' : value}`
+              }
             }
           }]
         }

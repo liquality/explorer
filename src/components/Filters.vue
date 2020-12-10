@@ -1,6 +1,18 @@
 <template>
   <div class="toolbar">
     <nav class="nav flex-column mb-3">
+      <span class="nav-link small">Pending Txs</span>
+      <span :class="{
+        'nav-link': true,
+        active: pending.includes('USER_FUNDED')
+      }" @click="setPending('USER_FUNDED')">Agent</span>
+      <span :class="{
+        'nav-link d-flex align-items-center': true,
+        active: pending.includes('USER_FUNDED_UNVERIFIED')
+      }" @click="setPending('USER_FUNDED_UNVERIFIED')">User</span>
+    </nav>
+
+    <nav class="nav flex-column mb-3">
       <span class="nav-link small">User</span>
       <span :class="{
         'nav-link': true,
@@ -79,11 +91,12 @@
 </template>
 
 <script>
-import axios from 'axios'
+import agent from '@/utils/agent'
 
 export default {
   data () {
     return {
+      pending: [],
       status: [
         'AGENT_CLAIMED'
       ],
@@ -97,7 +110,7 @@ export default {
     }
   },
   async created () {
-    const { data } = await axios('https://liquality-dashboard.herokuapp.com/api/swap/assetinfo')
+    const { data } = await agent.get('/api/swap/assetinfo')
 
     this.markets = data.map(data => data.code)
     this.fromMarkets = [...this.markets]
@@ -114,6 +127,13 @@ export default {
         }
       } else {
         this.status.push(status)
+      }
+    },
+    setPending (pending) {
+      if (this.pending.includes(pending)) {
+        this.pending = this.pending.filter(s => pending !== s)
+      } else {
+        this.pending.push(pending)
       }
     },
     setUserAgent (userAgent) {
@@ -139,6 +159,7 @@ export default {
   },
   watch: {
     status: 'safeEmit',
+    pending: 'safeEmit',
     fromMarkets: 'safeEmit',
     toMarkets: 'safeEmit',
     userAgent: 'safeEmit'

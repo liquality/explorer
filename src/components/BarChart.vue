@@ -10,7 +10,7 @@ export default {
     formatMixin
   ],
   mounted () {
-    this.renderChart(this.chartData)
+    this.renderChart(this.chartData, this.options)
   },
   computed: {
     options () {

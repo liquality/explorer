@@ -27,10 +27,10 @@
                   <td class="text-muted text-right small-12">Time</td>
                   <td>
                     {{formatDate(order.createdAt)}}
-                    <span v-if="!isEqual(order.createdAt, order.updatedAt) && order.updatedAt">
+                    <span v-if="!isEqual((order.createdAt), (order.updatedAt)) && order.updatedAt">
                       <span class="font-weight-bold text-muted mx-1">&rsaquo;</span>
                       {{formatDate(order.updatedAt)}}
-                      <span class="ml-1 text-success">{{formatDurationStrict(order.createdAt, order.updatedAt, false)}}</span>
+                      <span class="ml-1 text-success">{{formatDurationStrict((order.createdAt), (order.updatedAt), false)}}</span>
                     </span>
                   </td>
                 </tr>
@@ -47,6 +47,18 @@
                         'text-success': changeInMarketRate >= 0
                       }">{{changeInMarketRate}}%</span>
                     </span>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="text-muted text-right small-12">{{order.from}}/USD</td>
+                  <td>
+                    ${{formatAmount(order.fromRateUsd, 'USD')}}
+                  </td>
+                </tr>
+                <tr>
+                  <td class="text-muted text-right small-12">{{order.to}}/USD</td>
+                  <td>
+                    ${{formatAmount(order.toRateUsd, 'USD')}}
                   </td>
                 </tr>
                 <tr>
@@ -104,8 +116,24 @@
                   </td>
                 </tr>
                 <tr>
+                  <td class="text-muted text-right small-12">Total Tx Fees<br>Agent Paid</td>
+                  <td>
+                    ${{formatAmount(agentFees, 'USD')}}
+                  </td>
+                </tr>
+                <tr>
+                  <td class="text-muted text-right small-12">Total Tx Fees<br>User Paid</td>
+                  <td>
+                    ${{formatAmount(userFees, 'USD')}}
+                  </td>
+                </tr>
+                <tr>
                   <td class="text-muted text-right small-12">Status</td>
                   <td>{{order.status}}</td>
+                </tr>
+                <tr v-if="order.secretHash">
+                  <td class="text-muted text-right small-12">Secret Hash</td>
+                  <td>{{formatTxHash(order.secretHash, 'ETH')}}</td>
                 </tr>
                 <tr v-if="order.fromAddress">
                   <td class="text-muted text-right small-12">User's {{order.from}}<br>address</td>
@@ -148,35 +176,43 @@
                 <tr v-if="order.fromFundHash">
                   <td class="text-muted text-right small-12">User's {{order.from}}<br>funding transaction</td>
                   <td>
-                    <a :href="formatTxHashLink(order.fromFundHash, order.from)" target="_blank" rel="noopener">{{formatTxHash(order.fromFundHash, order.from)}}</a>
+                    <Tx :order="order" type="fromFundHash" />
                   </td>
                 </tr>
-                <tr v-if="order.secretHash">
-                  <td class="text-muted text-right small-12">Secret Hash</td>
-                  <td>{{formatTxHash(order.secretHash, 'ETH')}}</td>
+                <tr v-if="order.fromSecondaryFundHash">
+                  <td class="text-muted text-right small-12">User's {{order.from}}<br>secondary funding transaction</td>
+                  <td>
+                    <Tx :order="order" type="fromSecondaryFundHash" />
+                  </td>
                 </tr>
                 <tr v-if="order.toClaimHash">
                   <td class="text-muted text-right small-12">User's {{order.to}}<br>claim transaction</td>
                   <td>
-                    <a :href="formatTxHashLink(order.toClaimHash, order.to)" target="_blank" rel="noopener">{{formatTxHash(order.toClaimHash, order.to)}}</a>
+                    <Tx :order="order" type="toClaimHash" />
                   </td>
                 </tr>
                 <tr v-if="order.toFundHash">
                   <td class="text-muted text-right small-12">Agent's {{order.to}}<br>funding transaction</td>
                   <td>
-                    <a :href="formatTxHashLink(order.toFundHash, order.to)" target="_blank" rel="noopener">{{formatTxHash(order.toFundHash, order.to)}}</a>
+                    <Tx :order="order" type="toFundHash" />
+                  </td>
+                </tr>
+                <tr v-if="order.toSecondaryFundHash">
+                  <td class="text-muted text-right small-12">Agent's {{order.to}} secondary<br> funding transaction</td>
+                  <td>
+                    <Tx :order="order" type="toSecondaryFundHash" />
                   </td>
                 </tr>
                 <tr v-if="order.fromClaimHash">
                   <td class="text-muted text-right small-12">Agent's {{order.from}}<br>claim transaction</td>
                   <td>
-                    <a :href="formatTxHashLink(order.fromClaimHash, order.from)" target="_blank" rel="noopener">{{formatTxHash(order.fromClaimHash, order.from)}}</a>
+                    <Tx :order="order" type="fromClaimHash" />
                   </td>
                 </tr>
                 <tr v-if="order.toRefundHash">
                   <td class="text-muted text-right small-12">Agent's {{order.to}}<br>refund transaction</td>
                   <td>
-                    <a :href="formatTxHashLink(order.toRefundHash, order.to)" target="_blank" rel="noopener">{{formatTxHash(order.toRefundHash, order.to)}}</a>
+                    <Tx :order="order" type="toRefundHash" />
                   </td>
                 </tr>
                 <tr>
@@ -215,75 +251,7 @@
       <div class="col-md-4">
         <div v-if="auditLogs && auditLogs.length > 0">
           <h2 class="h5 mb-4">Timeline</h2>
-          <div class="order-timeline">
-            <div class="card font-weight-normal" v-for="(audit, idx) in auditLogs" :key="audit._id">
-              <div class="card-body">
-                <div v-if="audit.orderStatus === 'QUOTE'">
-                  <Check />
-                  <p class="mb-0">User requested a quote</p>
-                </div>
-                <div v-else-if="audit.context === 'SWAP_UPDATE'">
-                  <Check />
-                  <p class="mb-0">User has informed the agent about the funding transaction</p>
-                </div>
-                <div v-else-if="audit.context === 'VERIFY_USER_INIT_TX' && audit.status === 'USER_FUNDING_NOT_FOUND'" class="invert-icon-colors">
-                  <Check />
-                  <p class="mb-0">Agent is looking for user's funding transaction</p>
-                </div>
-                <div v-else-if="audit.context === 'VERIFY_USER_INIT_TX' && audit.status === 'USER_FUNDING_NEED_MORE_CONF'" class="invert-icon-colors">
-                  <Check />
-                  <p class="mb-0">Agent is waiting for {{audit.extra.minConf}} {{ audit.extra.minConf === 1 ? 'confirmation' : 'confirmations' }} on user's funding transaction</p>
-                </div>
-                <div v-else-if="audit.orderStatus === 'USER_FUNDED'" class="invert-icon-colors">
-                  <Check />
-                  <p class="mb-0">Agent has confirmed user's funding transaction</p>
-                </div>
-                <div v-else-if="audit.context === 'RECIPROCATE_INIT_SWAP'" class="invert-icon-colors">
-                  <Check />
-                  <p class="mb-0">Agent has reciprocated funding transaction</p>
-                </div>
-                <div v-else-if="audit.status === 'AGENT_CLAIM_WAITING'" class="invert-icon-colors">
-                  <Check />
-                  <p class="mb-0">Agent is waiting for user to claim</p>
-                </div>
-                <div v-else-if="audit.orderStatus === 'USER_CLAIMED'">
-                  <Check />
-                  <p class="mb-0">User has claimed agent's funding transaction</p>
-                </div>
-                <div v-else-if="audit.orderStatus === 'AGENT_CLAIMED'" class="invert-icon-colors">
-                  <Check />
-                  <p class="mb-0">Agent has claimed user's funding transaction</p>
-                </div>
-                <div v-else-if="audit.orderStatus === 'AGENT_REFUNDED'" class="invert-icon-colors">
-                  <Check />
-                  <p class="mb-0">Agent has refunded</p>
-                </div>
-                <div v-else>
-                  <Check />
-                  <p class="mb-0">
-                    <time :datetime="audit.createdAt">{{audit.createdAt}}</time> - {{audit.orderStatus}} - {{audit.status}} - {{audit.context}}
-                    <br>
-                    <pre>{{JSON.stringify(audit.extra, null, 2)}}</pre>
-                  </p>
-                </div>
-                <div class="mt-1 text-muted small d-block">
-                  <time :datetime="audit.createdAt">{{formatDate(auditMap[audit.key].end)}}</time>
-                  <span v-if="rates"> ({{formatAssetValue(rates[auditMap[audit.key].end.getTime()], order.to)}})</span>
-                  <br v-if="auditMap[audit.key].count > 1">
-                  <span v-if="auditMap[audit.key].count > 1">
-                    First attempt at {{formatDate(auditMap[audit.key].start)}}<span v-if="rates"> ({{formatAssetValue(rates[auditMap[audit.key].start.getTime()], order.to)}})</span><br>
-                    {{auditMap[audit.key].count}} attempts, took {{formatDurationStrict(auditMap[audit.key].start, auditMap[audit.key].end, false)}}
-                  </span>
-                </div>
-              </div>
-              <div class="card-body" v-if="idx < (auditLogs.length - 1)">
-                <div class="text-muted small align-items-center">
-                  <div class="time-diff"><div></div></div>
-                  <p class="mb-0"><em>+{{formatDurationStrict(auditMap[audit.key].end, auditMap[auditLogs[idx + 1].key].start, false)}}</em></p>
-                </div>
-              </div>
-            </div>
-          </div>
+          <AuditLog :order="order" :auditLogs="auditLogs" :auditMap="auditMap" :rates="rates" />
         </div>
       </div>
     </div>
@@ -291,12 +259,13 @@
 </template>
 
 <script>
-import axios from 'axios'
 import qs from 'qs'
-import { min, max, isEqual } from 'date-fns'
+import { min, max } from 'date-fns'
 
-import Check from '@/components/Icons/Check.vue'
+import Tx from '@/components/Order/Tx.vue'
+import AuditLog from '@/components/Order/AuditLog.vue'
 import format from '@/mixins/format'
+import agent from '@/utils/agent'
 
 export default {
   metaInfo () {
@@ -305,7 +274,8 @@ export default {
     }
   },
   components: {
-    Check
+    AuditLog,
+    Tx
   },
   mixins: [format],
   data () {
@@ -324,6 +294,26 @@ export default {
     }
   },
   computed: {
+    agentFees () {
+      let fees = 0
+
+      fees += this.getFeeForTxType('toFundHash')
+      fees += this.getFeeForTxType('toSecondaryFundHash')
+      fees += this.getFeeForTxType('fromClaimHash')
+      fees += this.getFeeForTxType('toRefundHash')
+
+      return fees
+    },
+    userFees () {
+      let fees = 0
+
+      fees += this.getFeeForTxType('fromFundHash')
+      fees += this.getFeeForTxType('fromSecondaryFundHash')
+      fees += this.getFeeForTxType('toClaimHash')
+      fees += this.getFeeForTxType('fromRefundHash')
+
+      return fees
+    },
     orderId () {
       return this.$route.params.orderId
     },
@@ -396,10 +386,20 @@ export default {
   methods: {
     percProfit (from, to) {
       return Math.ceil(((from - to) / from) * 10000) / 100
+    },
+    getFeeForTxType (type) {
+      const tx = this.order[type]
+
+      if (tx && this.order.txMap) {
+        const obj = this.order.txMap[tx]
+        if (obj) return obj.feeAmountUsd
+      }
+
+      return 0
     }
   },
   async created () {
-    const { data } = await axios(`https://liquality-dashboard.herokuapp.com/api/swap/order/${this.orderId}`, {
+    const { data } = await agent.get(`/api/swap/order/${this.orderId}`, {
       params: {
         verbose: true
       }
@@ -436,14 +436,14 @@ export default {
       return audit
     })
 
-    this.auditLogs = auditLogs.filter(audit => isEqual(auditMap[audit.key].start, new Date(audit.createdAt)))
+    this.auditLogs = auditLogs.filter(audit => this.isEqual(this.parseISO(auditMap[audit.key].start), new Date(audit.createdAt)))
     this.auditMap = auditMap
     this.order = data
 
     const addresses = new Set([data.toAddress, data.fromAddress].filter(a => !!a))
 
     const statsByAddresses = await Promise.all([...addresses].map(
-      address => axios('https://liquality-dashboard.herokuapp.com/api/dash/statsByAddress', { params: { address } }).then(response => response.data)
+      address => agent.get('/api/dash/statsByAddress', { params: { address } }).then(response => response.data)
     ))
 
     this.statsByAddresses = statsByAddresses.reduce((acc, obj) => {
@@ -459,7 +459,7 @@ export default {
       const timestamp = new Date(latestTimeStamp).getTime()
 
       const markets = [`${data.from}-USD`, `${data.to}-USD`, `${data.from}-${data.to}`].map(market => {
-        return axios('https://liquality-dashboard.herokuapp.com/api/dash/rate', { params: { market, timestamp } })
+        return agent.get('/api/dash/rate', { params: { market, timestamp } })
           .then(response => response.data.result)
       })
 
@@ -476,8 +476,7 @@ export default {
     }
 
     const rates = await Promise.all([...timestampSet].map(
-      timestamp => axios(
-        'https://liquality-dashboard.herokuapp.com/api/dash/rate', { params: { market: `${data.from}-${data.to}`, timestamp } }
+      timestamp => agent.get('/api/dash/rate', { params: { market: `${data.from}-${data.to}`, timestamp } }
       ).then(response => ({ timestamp, rate: response.data.result }))
     ))
 

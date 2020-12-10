@@ -19,8 +19,8 @@
 
 <script>
 import { debounce } from 'lodash-es'
-import axios from 'axios'
 
+import agent from '@/utils/agent'
 import Filters from '@/components/Filters.vue'
 import Pagination from '@/components/Pagination.vue'
 import OrderList from '@/components/OrderList.vue'
@@ -52,7 +52,7 @@ export default {
   methods: {
     safeBrowse: debounce(function () { this.browse() }, 500),
     async browse () {
-      const { data } = await axios('https://liquality-dashboard.herokuapp.com/api/dash/orders', {
+      const { data } = await agent.get('/api/dash/orders', {
         params: {
           ...this.filters,
           page: this.page,

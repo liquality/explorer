@@ -14,8 +14,7 @@
 </template>
 
 <script>
-import axios from 'axios'
-
+import agent from '@/utils/agent'
 import DataViz from '@/components/DataViz.vue'
 import OrderList from '@/components/OrderList.vue'
 
@@ -44,7 +43,7 @@ export default {
   },
   methods: {
     async search () {
-      const { data } = await axios('https://liquality-dashboard.herokuapp.com/api/dash/orders', {
+      const { data } = await agent.get('/api/dash/orders', {
         params: {
           q: this.address,
           start: 0,

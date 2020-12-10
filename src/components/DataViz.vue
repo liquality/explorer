@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="row pb-4 justify-content-center">
-      <div class="col-md-6">
+      <div class="col-md-4">
         <VueCtkDateTimePicker
           v-model="date"
           range
@@ -25,53 +25,70 @@
       </div>
     </div>
     <div class="row pb-4 justify-content-center">
-      <div class="col-md-3">
+      <div class="col-md-3" v-if="summary">
         <div class="card">
           <div class="card-body">
             <h6 class="mb-3 font-weight-light text-muted d-flex justify-content-between align-items-center">
               <span>Volume</span>
               <span :class="{
                 'font-weight-normal': true,
-                'text-danger': diffUsdVolume < 0,
-                'text-success': diffUsdVolume >= 0
-              }">{{diffUsdVolume}}%</span>
+                'text-danger': calculatePerc(summary.current['sum:fromAmountUsd'], summary.compare['sum:fromAmountUsd']) < 0,
+                'text-success': calculatePerc(summary.current['sum:fromAmountUsd'], summary.compare['sum:fromAmountUsd']) >= 0
+              }">{{calculatePerc(summary.current['sum:fromAmountUsd'], summary.compare['sum:fromAmountUsd'])}}%</span>
             </h6>
             <p class="h3 font-weight-light mb-0">
-              ${{formatAmount(totalUsdVolume, 'USD')}}
+              ${{formatAmount(summary.current['sum:fromAmountUsd'], 'USD')}}
             </p>
           </div>
         </div>
       </div>
-      <div class="col-md-3">
+      <div class="col-md-3" v-if="summary">
         <div class="card">
           <div class="card-body">
             <h6 class="mb-3 font-weight-light text-muted d-flex justify-content-between align-items-center">
               <span>Swaps</span>
               <span :class="{
                 'font-weight-normal': true,
-                'text-danger': diffTotalCount < 0,
-                'text-success': diffTotalCount >= 0
-              }">{{diffTotalCount}}%</span>
+                'text-danger': calculatePerc(summary.current.count, summary.compare.count) < 0,
+                'text-success': calculatePerc(summary.current.count, summary.compare.count) >= 0
+              }">{{calculatePerc(summary.current.count, summary.compare.count)}}%</span>
             </h6>
             <p class="h3 font-weight-light mb-0">
-              {{totalCount}}
+              {{summary.current.count}}
             </p>
           </div>
         </div>
       </div>
-      <div class="col-md-3" v-if="mostActiveMarket">
+      <div class="col-md-3" v-if="summary">
         <div class="card">
           <div class="card-body">
             <h6 class="mb-3 font-weight-light text-muted d-flex justify-content-between align-items-center">
               <span>Average Value</span>
               <span :class="{
                 'font-weight-normal': true,
-                'text-danger': diffAverageOrderValue < 0,
-                'text-success': diffAverageOrderValue >= 0
-              }">{{diffAverageOrderValue}}%</span>
+                'text-danger': calculatePerc(summary.current['average:fromAmountUsd'], summary.compare['average:fromAmountUsd']) < 0,
+                'text-success': calculatePerc(summary.current['average:fromAmountUsd'], summary.compare['average:fromAmountUsd']) >= 0
+              }">{{calculatePerc(summary.current['average:fromAmountUsd'], summary.compare['average:fromAmountUsd'])}}%</span>
             </h6>
             <p class="h3 font-weight-light mb-0">
-              ${{formatAmount(averageOrderValue, 'USD')}}
+              ${{formatAmount(summary.current['average:fromAmountUsd'], 'USD')}}
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3" v-if="summary">
+        <div class="card">
+          <div class="card-body">
+            <h6 class="mb-3 font-weight-light text-muted d-flex justify-content-between align-items-center">
+              <span>Tx Fee</span>
+              <span :class="{
+                'font-weight-normal': true,
+                'text-danger': calculatePerc(summary.current['sum:totalAgentFeeUsd'], summary.compare['sum:totalAgentFeeUsd']) < 0,
+                'text-success': calculatePerc(summary.current['sum:totalAgentFeeUsd'], summary.compare['sum:totalAgentFeeUsd']) >= 0
+              }">{{calculatePerc(summary.current['sum:totalAgentFeeUsd'], summary.compare['sum:totalAgentFeeUsd'])}}%</span>
+            </h6>
+            <p class="h3 font-weight-light mb-0">
+              ${{formatAmount(summary.current['sum:totalAgentFeeUsd'], 'USD')}}
             </p>
           </div>
         </div>
@@ -80,42 +97,79 @@
         <div class="card">
           <div class="card-body">
             <h6 class="mb-3 font-weight-light text-muted d-flex justify-content-between align-items-center">
-              <span>Top Market</span>
-              <span :class="{
-                'font-weight-normal': true,
-                'text-danger': diffActiveMarketVolume < 0,
-                'text-success': diffActiveMarketVolume >= 0
-              }">{{diffActiveMarketVolume}}%</span>
+              <span>Profit/Loss</span>
             </h6>
             <p class="h3 font-weight-light mb-0">
-              {{mostActiveMarket}}
+              ${{formatAmount(amountUsdDiff, 'USD')}}
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3" v-if="mostActiveMarket">
+        <div class="card">
+          <div class="card-body">
+            <h6 class="mb-3 font-weight-light text-muted d-flex justify-content-between align-items-center">
+              <span>Net Profit/Loss</span>
+              <span :class="{
+                'font-weight-normal': true
+              }">{{formatAmount(((amountUsdDiff - totalAgentFeeUsd) * 100) / totalUsdVolume, 'USD')}}%</span>
+            </h6>
+            <p class="h3 font-weight-light mb-0">
+              ${{formatAmount(amountUsdDiff - totalAgentFeeUsd, 'USD')}}
             </p>
           </div>
         </div>
       </div>
     </div>
 
-    <h2 class="h5">Volume</h2>
-    <div class="card mb-4">
-      <div class="card-body">
-        <LineChart :chartData="lineChartData" :compareLabels="compareLabels" :height="300" />
-      </div>
-    </div>
-
-    <div class="row justify-content-center">
-      <div class="col-md-6">
-        <h2 class="h5">Markets</h2>
-        <div class="card">
-          <div class="card-body">
-            <BarChart :chartData="barChartData" :height="300" key="marketChart" />
+    <div v-if="lineCharts">
+      <div class="row">
+        <div class="col-md-6">
+          <div class="card mb-4">
+            <div class="card-body">
+              <h2 class="h6 mb-4 font-weight-light text-muted">Number of Swaps</h2>
+              <LineChart :chartData="lineCharts['count'].data" :compareLabels="lineCharts['count'].compareLabels" :height="300" />
+            </div>
           </div>
         </div>
-      </div>
-      <div class="col-md-6">
-        <h2 class="h5">User agents</h2>
-        <div class="card">
-          <div class="card-body">
-            <BarChart :chartData="walletChartData" :height="300" key="walletChart" />
+        <div class="col-md-6">
+          <div class="card mb-4">
+            <div class="card-body">
+              <h2 class="h6 mb-4 font-weight-light text-muted">Incoming Volume</h2>
+              <LineChart :chartData="lineCharts['sum:fromAmountUsd'].data" :compareLabels="lineCharts['sum:fromAmountUsd'].compareLabels" :height="300" :usd="true" />
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card mb-4">
+            <div class="card-body">
+              <h2 class="h6 mb-4 font-weight-light text-muted">Profit/Loss</h2>
+              <LineChart :chartData="lineCharts['sum:totalFromToAmountUsdDiffWithFees'].data" :compareLabels="lineCharts['sum:totalFromToAmountUsdDiffWithFees'].compareLabels" :height="300" :usd="true" />
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card mb-4">
+            <div class="card-body">
+              <h2 class="h6 mb-4 font-weight-light text-muted">Tx Fees</h2>
+              <LineChart :chartData="lineCharts['sum:totalAgentFeeUsd'].data" :compareLabels="lineCharts['sum:totalAgentFeeUsd'].compareLabels" :height="300" :usd="true" />
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6" v-if="topMarketsByVolumeChart">
+          <div class="card">
+            <div class="card-body">
+              <h2 class="h6 mb-4 font-weight-light text-muted">Top 5 Markets By Incoming Volume</h2>
+              <BarChart :chartData="topMarketsByVolumeChart" :height="300" key="marketChart" />
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6" v-if="volumeByApplicationsChart">
+          <div class="card">
+            <div class="card-body">
+              <h2 class="h6 mb-4 font-weight-light text-muted">Incoming Volume By Application</h2>
+              <BarChart :chartData="volumeByApplicationsChart" :height="300" key="walletChart" />
+            </div>
           </div>
         </div>
       </div>
@@ -124,11 +178,11 @@
 </template>
 
 <script>
-import axios from 'axios'
 import { getTime, subDays, differenceInDays } from 'date-fns'
 import VueCtkDateTimePicker from 'vue-ctk-date-time-picker'
 import 'vue-ctk-date-time-picker/dist/vue-ctk-date-time-picker.css'
 
+import agent from '@/utils/agent'
 import formatMixin from '@/mixins/format'
 
 import BarChart from '@/components/BarChart.vue'
@@ -158,7 +212,16 @@ export default {
       diffTotalCount: 0,
       diffActiveMarketVolume: 0,
       averageOrderValue: 0,
-      diffAverageOrderValue: 0
+      diffAverageOrderValue: 0,
+      totalAgentFeeUsd: 0,
+      totalUserFeeUsd: 0,
+      totalFeeUsd: 0,
+      amountUsdDiff: 0,
+      summary: null,
+      profitLossChart: null,
+      lineCharts: null,
+      topMarketsByVolumeChart: null,
+      volumeByApplicationsChart: null
     }
   },
   computed: {
@@ -189,18 +252,71 @@ export default {
     this.fillData()
   },
   methods: {
+    calculatePerc (a, b) {
+      return Math.ceil(((a - b) / b) * 10000) / 100
+    },
     async fillData () {
-      const [data, compare] = await Promise.all([this.getData(this.range), this.getData(this.range.compare)])
+      const [current, compare] = await Promise.all([this.getData(this.range), this.getData(this.range.compare)])
 
-      if (data.barChart.labels.length <= 2) {
-        data.barChart.labels.push('')
-        data.barChart.values.push(0)
+      this.summary = {
+        current: current.summary,
+        compare: compare.summary
       }
 
-      this.barChartData = {
-        labels: data.barChart.labels, // [...data.barChart.labels, ''],
+      const lineCharts = Object
+        .keys(current.timeseries.values)
+        .reduce((acc, key) => {
+          acc[key] = {
+            compareLabels: compare.timeseries.labels,
+            data: {
+              labels: current.timeseries.labels,
+              datasets: [{
+                data: current.timeseries.values[key],
+                borderWidth: 2,
+                borderColor: '#243B53',
+                backgroundColor: 'transparent',
+                lineTension: 0,
+                pointRadius: 0,
+                showLine: true
+              }, {
+                data: compare.timeseries.values[key],
+                borderWidth: 2,
+                borderColor: '#243a5233',
+                backgroundColor: 'transparent',
+                lineTension: 0,
+                pointRadius: 0,
+                showLine: true
+              }]
+            }
+          }
+
+          return acc
+        }, {})
+
+      this.lineCharts = lineCharts
+
+      console.log(compare.markets)
+
+      const topMarketsByVolume = current.markets.slice(0, 5).reduce((acc, [key, value]) => {
+        acc.labels.push(key)
+        acc.values.current.push(value['sum:fromAmountUsd'])
+
+        const cmp = compare.markets.find(market => market[0] === key)
+        acc.values.compare.push(cmp[1]['sum:fromAmountUsd'])
+
+        return acc
+      }, {
+        labels: [],
+        values: {
+          current: [],
+          compare: []
+        }
+      })
+
+      this.topMarketsByVolumeChart = {
+        labels: topMarketsByVolume.labels,
         datasets: [{
-          data: data.barChart.values, // [..., 0],
+          data: topMarketsByVolume.values.current,
           borderWidth: 2,
           borderColor: '#243B53',
           backgroundColor: '#243B53',
@@ -208,69 +324,49 @@ export default {
           pointRadius: 2,
           pointBackgroundColor: '#243B53',
           fill: true
-        }]
-      }
-
-      this.walletChartData = {
-        labels: data.walletUi.map(a => a[0]),
-        datasets: [{
-          data: data.walletUi.map(a => a[1]),
-          borderWidth: 2,
-          borderColor: '#243B53',
-          backgroundColor: '#243B53',
-          lineTension: 0,
-          pointRadius: 2,
-          pointBackgroundColor: '#243B53',
-          fill: true
-        }]
-      }
-
-      this.lineChartData = {
-        labels: data.lineChart.labels,
-        datasets: [{
-          data: data.lineChart.values,
-          borderWidth: 2,
-          borderColor: '#243B53',
-          backgroundColor: 'transparent',
-          lineTension: 0,
-          pointRadius: 0
         }, {
-          data: compare.lineChart.values,
-          borderWidth: 2,
-          borderColor: '#243a5233',
-          backgroundColor: 'transparent',
+          data: topMarketsByVolume.values.compare,
+          borderWidth: 0,
+          backgroundColor: '#243a5233',
           lineTension: 0,
-          pointRadius: 0
+          pointRadius: 2,
+          pointBackgroundColor: '#243a5233',
+          fill: true
         }]
       }
 
-      this.compareLabels = compare.lineChart.labels
-      this.totalUsdVolume = data.totalUsdVolume
-      this.totalCount = data.totalCount
-      this.averageOrderValue = data.averageOrderValue
-
-      this.diffAverageOrderValue = (Math.ceil(((data.averageOrderValue - compare.averageOrderValue) / compare.averageOrderValue) * 10000) / 100) || 0
-      this.diffUsdVolume = (Math.ceil(((data.totalUsdVolume - compare.totalUsdVolume) / compare.totalUsdVolume) * 10000) / 100) || 0
-      this.diffTotalCount = (Math.ceil(((data.totalCount - compare.totalCount) / compare.totalCount) * 10000) / 100) || 0
-
-      const mostActiveMarket = data.mostActiveMarket && data.mostActiveMarket[0]
-      if (!mostActiveMarket) {
-        this.mostActiveMarket = null
-        return
+      this.volumeByApplicationsChart = {
+        labels: [
+          'Wallet', 'Swap UI'
+        ],
+        datasets: [{
+          data: [
+            current.summary['wallet:sum:fromAmountUsd'],
+            current.summary['sum:fromAmountUsd'] - current.summary['wallet:sum:fromAmountUsd']
+          ],
+          borderWidth: 2,
+          borderColor: '#243B53',
+          backgroundColor: '#243B53',
+          lineTension: 0,
+          pointRadius: 2,
+          pointBackgroundColor: '#243B53',
+          fill: true
+        }, {
+          data: [
+            compare.summary['wallet:sum:fromAmountUsd'],
+            compare.summary['sum:fromAmountUsd'] - compare.summary['wallet:sum:fromAmountUsd']
+          ],
+          borderWidth: 0,
+          backgroundColor: '#243a5233',
+          lineTension: 0,
+          pointRadius: 2,
+          pointBackgroundColor: '#243a5233',
+          fill: true
+        }]
       }
-
-      this.mostActiveMarket = mostActiveMarket
-
-      const dataIndex = data.barChart.labels.findIndex(label => label === mostActiveMarket)
-      const dataValue = data.barChart.values[dataIndex]
-
-      const compareIndex = compare.barChart.labels.findIndex(label => label === mostActiveMarket)
-      const compareValue = compare.barChart.values[compareIndex]
-
-      this.diffActiveMarketVolume = (Math.ceil(((dataValue - compareValue) / compareValue) * 10000) / 100) || 0
     },
     async getData (range) {
-      const { data: { result: { stats: data } } } = await axios('https://liquality-dashboard.herokuapp.com/api/dash/stats', {
+      const { data: { result: { stats: data } } } = await agent.get('/api/dash/stats', {
         params: {
           start: getTime(range.start),
           end: getTime(range.end),
@@ -278,58 +374,58 @@ export default {
         }
       })
 
-      let totalCount = 0
-      let totalUsdVolume = 0
+      const returnValue = data.reduce((acc, point) => {
+        acc.timeseries.labels.push(point.date)
 
-      let walletCount = 0
-      let walletUsdVolume = 0
+        Object
+          .keys(point)
+          .filter(key => key.includes('sum:') || key.includes('count'))
+          .forEach(key => {
+            if (!acc.summary[key]) acc.summary[key] = 0
+            if (!acc.timeseries.values[key]) acc.timeseries.values[key] = []
 
-      const _barChart = data.reduce((acc, { count, volume, wallet_count, wallet_volume, markets }) => { /* eslint-disable-line */
-        if (wallet_count) { /* eslint-disable-line */
-          walletCount += wallet_count /* eslint-disable-line */
-          walletUsdVolume += wallet_volume /* eslint-disable-line */
-        }
+            const value = point[key]
+            acc.summary[key] += value
+            acc.timeseries.values[key].push(value)
+          })
 
-        Object.keys(markets).forEach(market => {
-          if (!acc[market]) acc[market] = 0
-          acc[market] += markets[market].usd_volume
-
-          totalUsdVolume += markets[market].usd_volume
-          totalCount += markets[market].count
-        })
+        const usdDiff = point['sum:fromAmountUsd'] - point['sum:toAmountUsd']
+        acc.timeseries.values['sum:totalFromToAmountUsdDiffWithFees'].push(usdDiff - point['sum:totalAgentFeeUsd'])
 
         return acc
-      }, {})
-
-      const sortedPieChart = Object.entries(_barChart).sort((a, b) => b[1] - a[1])
-      const mostActiveMarket = sortedPieChart[0]
-      const barChart = sortedPieChart.reduce((acc, [key, value]) => {
-        if (value) {
-          acc.labels.push(key)
-          acc.values.push(value)
+      }, {
+        summary: {},
+        timeseries: {
+          labels: [],
+          values: {
+            'sum:totalFromToAmountUsdDiffWithFees': []
+          }
         }
+      })
 
-        return acc
-      }, { labels: [], values: [] })
+      const markets = Object
+        .keys(returnValue.summary)
+        .filter(key => key.startsWith('market:'))
+        .reduce((acc, key) => {
+          const arr = key.split(':')
+          arr.shift() // remove 'market'
 
-      const walletUi = [['Wallet', walletUsdVolume], ['UI', totalUsdVolume - walletUsdVolume]]
+          const market = arr.shift()
+          const newKey = arr.join(':')
 
-      walletUi.sort((a, b) => b[1] - a[1])
+          if (!acc[market]) acc[market] = {}
+          acc[market][newKey] = returnValue.summary[key]
 
-      return {
-        mostActiveMarket,
-        totalCount,
-        totalUsdVolume,
-        averageOrderValue: totalUsdVolume / totalCount,
-        walletCount,
-        walletUsdVolume,
-        walletUi,
-        barChart,
-        lineChart: {
-          labels: data.map(point => point.date),
-          values: data.map(point => point.usd_volume)
-        }
-      }
+          return acc
+        }, {})
+
+      const arr = Object.entries(markets)
+      arr.sort((a, b) => b[1]['sum:fromAmountUsd'] - a[1]['sum:fromAmountUsd'])
+
+      returnValue.markets = arr
+      returnValue.summary['average:fromAmountUsd'] = Math.ceil((returnValue.summary['sum:fromAmountUsd'] / returnValue.summary.count) * 100) / 100
+
+      return returnValue
     }
   }
 }
