@@ -300,7 +300,7 @@ export default {
         acc.values.current.push(value['sum:fromAmountUsd'])
 
         const cmp = compare.markets.find(market => market[0] === key)
-        acc.values.compare.push(cmp[1]['sum:fromAmountUsd'])
+        acc.values.compare.push(cmp ? cmp[1]['sum:fromAmountUsd'] : 0)
 
         return acc
       }, {
