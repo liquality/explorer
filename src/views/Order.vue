@@ -142,7 +142,7 @@
                       {{formatAddress(order.fromAddress, order.from)}}
                     </router-link>
                     <small class="d-block text-muted" v-if="statsByAddresses[order.fromAddress] && statsByAddresses[order.fromAddress].count > 0">
-                      {{statsByAddresses[order.fromAddress].count}} {{formatPlural(statsByAddresses[order.fromAddress].count, 'order', 'orders')}} worth ${{formatAmount(statsByAddresses[order.fromAddress].usd_volume, 'USD')}}
+                      {{statsByAddresses[order.fromAddress].count}} {{formatPlural(statsByAddresses[order.fromAddress].count, 'order', 'orders')}} worth ${{formatAmount(statsByAddresses[order.fromAddress]['sum:fromAmountUsd'], 'USD')}}
                     </small>
                   </td>
                 </tr>
@@ -153,7 +153,7 @@
                       {{formatAddress(order.toAddress, order.to)}}
                     </router-link>
                     <small class="d-block text-muted" v-if="order.fromAddress !== order.toAddress && statsByAddresses[order.toAddress] && statsByAddresses[order.toAddress].count > 0">
-                      {{statsByAddresses[order.toAddress].count}} {{formatPlural(statsByAddresses[order.toAddress].count, 'order', 'orders')}} worth ${{formatAmount(statsByAddresses[order.toAddress].usd_volume, 'USD')}}
+                      {{statsByAddresses[order.toAddress].count}} {{formatPlural(statsByAddresses[order.toAddress].count, 'order', 'orders')}} worth ${{formatAmount(statsByAddresses[order.toAddress]['sum:fromAmountUsd'], 'USD')}}
                     </small>
                   </td>
                 </tr>

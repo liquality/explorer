@@ -31,8 +31,8 @@
             </td>
             <td class="text-center">
               <router-link :to="'/address/' + item.address">
-                ${{formatAmount(item.usd_volume, 'USD')}}
-                <small v-if="accumulate">{{perc(item.usd_volume, 'usd_volume')}}%</small>
+                ${{formatAmount(item['sum:fromAmountUsd'], 'USD')}}
+                <small v-if="accumulate">{{perc(item['sum:fromAmountUsd'], 'sum:fromAmountUsd')}}%</small>
               </router-link>
             </td>
             <td class="text-center">

@@ -295,8 +295,6 @@ export default {
 
       this.lineCharts = lineCharts
 
-      console.log(compare.markets)
-
       const topMarketsByVolume = current.markets.slice(0, 5).reduce((acc, [key, value]) => {
         acc.labels.push(key)
         acc.values.current.push(value['sum:fromAmountUsd'])
