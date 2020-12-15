@@ -64,15 +64,15 @@
                 <tr>
                   <td class="text-muted text-right small-12">{{order.from}} Value</td>
                   <td>
-                    ${{formatAmount(order.fromUsdValue, 'USD')}}
-                    <span v-if="latestFromUsdValue">
+                    ${{formatAmount(order.fromAmountUsd, 'USD')}}
+                    <span v-if="latestfromAmountUsd">
                       <span class="text-muted mx-1">&rsaquo;</span>
                       <span>
-                        ${{formatAmount(latestFromUsdValue, 'USD')}}
+                        ${{formatAmount(latestfromAmountUsd, 'USD')}}
                         <span class="ml-1" :class="{
-                          'text-danger': changeInFromUsdValue < 0,
-                          'text-success': changeInFromUsdValue >= 0
-                        }">{{changeInFromUsdValue}}%</span>
+                          'text-danger': changeInfromAmountUsd < 0,
+                          'text-success': changeInfromAmountUsd >= 0
+                        }">{{changeInfromAmountUsd}}%</span>
                       </span>
                     </span>
                   </td>
@@ -80,16 +80,16 @@
                 <tr>
                   <td class="text-muted text-right small-12">{{order.to}} Value</td>
                   <td>
-                    ${{formatAmount(order.toUsdValue, 'USD')}}
-                    <span v-if="latestToUsdValue">
+                    ${{formatAmount(order.toAmountUsd, 'USD')}}
+                    <span v-if="latesttoAmountUsd">
                       <span class="text-muted mx-1">&rsaquo;</span>
                       <span>
-                        ${{formatAmount(latestToUsdValue, 'USD')}}
+                        ${{formatAmount(latesttoAmountUsd, 'USD')}}
                         <span :class="{
                           'ml-1': true,
-                          'text-danger': changeInToUsdValue < 0,
-                          'text-success': changeInToUsdValue >= 0
-                        }">{{changeInToUsdValue}}%</span>
+                          'text-danger': changeIntoAmountUsd < 0,
+                          'text-success': changeIntoAmountUsd >= 0
+                        }">{{changeIntoAmountUsd}}%</span>
                       </span>
                     </span>
                   </td>
@@ -98,20 +98,20 @@
                   <td class="text-muted text-right small-12">USD Difference</td>
                   <td>
                     <span :class="{
-                      'text-danger': percProfit(order.fromUsdValue, order.toUsdValue) < 0,
-                      'text-success': percProfit(order.fromUsdValue, order.toUsdValue) >= 0
-                    }">${{formatAmount(order.fromUsdValue - order.toUsdValue, 'USD')}} ({{percProfit(order.fromUsdValue, order.toUsdValue)}}%)</span>
+                      'text-danger': percProfit(order.fromAmountUsd, order.toAmountUsd) < 0,
+                      'text-success': percProfit(order.fromAmountUsd, order.toAmountUsd) >= 0
+                    }">${{formatAmount(order.fromAmountUsd - order.toAmountUsd, 'USD')}} ({{percProfit(order.fromAmountUsd, order.toAmountUsd)}}%)</span>
                     <span class="text-muted mx-2">&rsaquo;</span>
                     <span :class="{
-                      'text-danger': percProfit(latestFromUsdValue, latestToUsdValue) < 0,
-                      'text-success': percProfit(latestFromUsdValue, latestToUsdValue) >= 0
-                    }">${{formatAmount(latestFromUsdValue - latestToUsdValue, 'USD')}} ({{percProfit(latestFromUsdValue, latestToUsdValue)}}%)</span>
+                      'text-danger': percProfit(latestfromAmountUsd, latesttoAmountUsd) < 0,
+                      'text-success': percProfit(latestfromAmountUsd, latesttoAmountUsd) >= 0
+                    }">${{formatAmount(latestfromAmountUsd - latesttoAmountUsd, 'USD')}} ({{percProfit(latestfromAmountUsd, latesttoAmountUsd)}}%)</span>
                     <span class="text-muted mx-2">&rsaquo;</span>
                     <span :class="{
-                      'text-danger': (latestFromUsdValue - latestToUsdValue - (order.fromUsdValue - order.toUsdValue)) < 0,
-                      'text-success': (latestFromUsdValue - latestToUsdValue - (order.fromUsdValue - order.toUsdValue)) >= 0
+                      'text-danger': (latestfromAmountUsd - latesttoAmountUsd - (order.fromAmountUsd - order.toAmountUsd)) < 0,
+                      'text-success': (latestfromAmountUsd - latesttoAmountUsd - (order.fromAmountUsd - order.toAmountUsd)) >= 0
                     }">
-                      ${{formatAmount(latestFromUsdValue - latestToUsdValue - (order.fromUsdValue - order.toUsdValue), 'USD')}}
+                      ${{formatAmount(latestfromAmountUsd - latesttoAmountUsd - (order.fromAmountUsd - order.toAmountUsd), 'USD')}}
                     </span>
                   </td>
                 </tr>
@@ -173,43 +173,57 @@
                     </router-link>
                   </td>
                 </tr>
-                <tr v-if="order.fromFundHash">
+                <tr v-if="order.fromFundHash" :class="{
+                  'unconfirmed-tx': isPendingTx(order, 'fromFundHash')
+                }">
                   <td class="text-muted text-right small-12">User's {{order.from}}<br>funding transaction</td>
                   <td>
                     <Tx :order="order" type="fromFundHash" />
                   </td>
                 </tr>
-                <tr v-if="order.fromSecondaryFundHash">
+                <tr v-if="order.fromSecondaryFundHash" :class="{
+                  'unconfirmed-tx': isPendingTx(order, 'fromSecondaryFundHash')
+                }">
                   <td class="text-muted text-right small-12">User's {{order.from}}<br>secondary funding transaction</td>
                   <td>
                     <Tx :order="order" type="fromSecondaryFundHash" />
                   </td>
                 </tr>
-                <tr v-if="order.toClaimHash">
+                <tr v-if="order.toClaimHash" :class="{
+                  'unconfirmed-tx': isPendingTx(order, 'toClaimHash')
+                }">
                   <td class="text-muted text-right small-12">User's {{order.to}}<br>claim transaction</td>
                   <td>
                     <Tx :order="order" type="toClaimHash" />
                   </td>
                 </tr>
-                <tr v-if="order.toFundHash">
+                <tr v-if="order.toFundHash" :class="{
+                  'unconfirmed-tx': isPendingTx(order, 'toFundHash')
+                }">
                   <td class="text-muted text-right small-12">Agent's {{order.to}}<br>funding transaction</td>
                   <td>
                     <Tx :order="order" type="toFundHash" />
                   </td>
                 </tr>
-                <tr v-if="order.toSecondaryFundHash">
+                <tr v-if="order.toSecondaryFundHash" :class="{
+                  'unconfirmed-tx': isPendingTx(order, 'toSecondaryFundHash')
+                }">
                   <td class="text-muted text-right small-12">Agent's {{order.to}} secondary<br> funding transaction</td>
                   <td>
                     <Tx :order="order" type="toSecondaryFundHash" />
                   </td>
                 </tr>
-                <tr v-if="order.fromClaimHash">
+                <tr v-if="order.fromClaimHash" :class="{
+                  'unconfirmed-tx': isPendingTx(order, 'fromClaimHash')
+                }">
                   <td class="text-muted text-right small-12">Agent's {{order.from}}<br>claim transaction</td>
                   <td>
                     <Tx :order="order" type="fromClaimHash" />
                   </td>
                 </tr>
-                <tr v-if="order.toRefundHash">
+                <tr v-if="order.toRefundHash" :class="{
+                  'unconfirmed-tx': isPendingTx(order, 'toRefundHash')
+                }">
                   <td class="text-muted text-right small-12">Agent's {{order.to}}<br>refund transaction</td>
                   <td>
                     <Tx :order="order" type="toRefundHash" />
@@ -284,10 +298,10 @@ export default {
       auditLogs: null,
       auditMap: null,
       statsByAddresses: {},
-      latestFromUsdValue: null,
-      latestToUsdValue: null,
-      changeInFromUsdValue: null,
-      changeInToUsdValue: null,
+      latestfromAmountUsd: null,
+      latesttoAmountUsd: null,
+      changeInfromAmountUsd: null,
+      changeIntoAmountUsd: null,
       rates: null,
       latestMarketRate: null,
       changeInMarketRate: null
@@ -384,6 +398,16 @@ export default {
     }
   },
   methods: {
+    isPendingTx (order, type) {
+      const hash = order[type]
+
+      if (!hash) return true
+      if (!order.txMap[hash]) return true
+      if (!order.txMap) return true
+      if (!order.txMap[hash].blockHash) return true
+
+      return false
+    },
     percProfit (from, to) {
       return Math.ceil(((from - to) / from) * 10000) / 100
     },
@@ -465,11 +489,11 @@ export default {
 
       const [fromUsdRate, toUsdRate, marketRate] = await Promise.all(markets)
 
-      this.latestFromUsdValue = this.formatUnitToCurrency(data.fromAmount, data.from) * fromUsdRate
-      this.changeInFromUsdValue = Math.ceil(((this.latestFromUsdValue - data.fromUsdValue) / data.fromUsdValue) * 10000) / 100
+      this.latestfromAmountUsd = this.formatUnitToCurrency(data.fromAmount, data.from) * fromUsdRate
+      this.changeInfromAmountUsd = Math.ceil(((this.latestfromAmountUsd - data.fromAmountUsd) / data.fromAmountUsd) * 10000) / 100
 
-      this.latestToUsdValue = this.formatUnitToCurrency(data.toAmount, data.to) * toUsdRate
-      this.changeInToUsdValue = Math.ceil(((this.latestToUsdValue - data.toUsdValue) / data.toUsdValue) * 10000) / 100
+      this.latesttoAmountUsd = this.formatUnitToCurrency(data.toAmount, data.to) * toUsdRate
+      this.changeIntoAmountUsd = Math.ceil(((this.latesttoAmountUsd - data.toAmountUsd) / data.toAmountUsd) * 10000) / 100
 
       this.latestMarketRate = marketRate
       this.changeInMarketRate = Math.ceil(((marketRate - data.rate) / data.rate) * 10000) / 100

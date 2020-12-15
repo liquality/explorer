@@ -16,11 +16,11 @@
           <td scope="col" :class="{
             'text-muted': true,
             'cursor-pointer': !noSort
-          }" @click="setSort('fromUsdValue')">
+          }" @click="setSort('fromAmountUsd')">
             Value
             <span v-if="!noSort">
-              <span v-if="sort === 'fromUsdValue'">&#8595;</span>
-              <span v-else-if="sort === '-fromUsdValue'">&#8593;</span>
+              <span v-if="sort === 'fromAmountUsd'">&#8595;</span>
+              <span v-else-if="sort === '-fromAmountUsd'">&#8593;</span>
             </span>
           </td>
           <td scope="col" colspan="3" class="text-muted">Swap</td>
@@ -29,7 +29,9 @@
         </tr>
       </thead>
       <tbody class="font-weight-normal">
-        <tr v-for="item in list" :key="item.orderId">
+        <tr v-for="item in list" :key="item.orderId" :class="{
+          'unconfirmed-tx': item.hasUnconfirmedTx
+        }">
           <td>
             <router-link :to="'/order/' + item.orderId" class="text-muted">
               {{formatDuration(item.createdAt)}}<br>
@@ -38,11 +40,11 @@
           </td>
           <td>
             <router-link :to="'/order/' + item.orderId">
-              ${{formatAmount(item.fromUsdValue, 'USD')}}
+              ${{formatAmount(item.fromAmountUsd, 'USD')}}
               <small :class="{
-                'text-danger': percProfit(item.fromUsdValue, item.toUsdValue) < 0,
-                'text-success': percProfit(item.fromUsdValue, item.toUsdValue) >= 0
-              }">{{percProfit(item.fromUsdValue, item.toUsdValue)}}%</small>
+                'text-danger': percProfit(item.fromAmountUsd, item.toAmountUsd) < 0,
+                'text-success': percProfit(item.fromAmountUsd, item.toAmountUsd) >= 0
+              }">{{percProfit(item.fromAmountUsd, item.toAmountUsd)}}%</small>
             </router-link>
           </td>
           <td class="text-right">

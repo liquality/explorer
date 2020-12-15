@@ -5,10 +5,12 @@
     Fee ${{formatAmount(txObject.feeAmountUsd, 'USD')}}
     &bull;
     {{txObject.feePrice}} {{feeUnit}}
-    &bull;
-    <a :href="formatBlockLink(txObject.blockHash, asset)" target="_blank" rel="noopener" class="text-muted">
-      Block #{{formatAmount(txObject.blockNumber, 'USD')}}
-    </a>
+    <span v-if="txObject.blockHash">
+      &bull;
+      <a :href="formatBlockLink(txObject.blockHash, asset)" target="_blank" rel="noopener" class="text-muted">
+        Block #{{formatAmount(txObject.blockNumber, 'USD')}}
+      </a>
+    </span>
   </small>
 </span>
 </template>
