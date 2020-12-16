@@ -86,7 +86,13 @@ export default {
     return {
       pending: [],
       status: [
-        'AGENT_CLAIMED'
+        'USER_FUNDED',
+        'USER_FUNDED_UNVERIFIED',
+        'USER_CLAIMED',
+        'AGENT_CLAIMED',
+        'AGENT_FUNDED',
+        'AGENT_CLAIMED',
+        'AGENT_REFUNDED'
       ],
       userAgent: [
         'WALLET',
