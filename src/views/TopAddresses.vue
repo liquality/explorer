@@ -22,7 +22,8 @@
             <td scope="col" class="text-muted text-right">Markets</td>
           </tr>
         </thead>
-        <tbody class="font-weight-normal">
+        <LoadingTableBody :trCount="25" :tdCount="4" v-if="loading" />
+        <tbody class="font-weight-normal" v-else>
           <tr v-for="item in addresses" :key="item.address">
             <td>
               <router-link :to="'/address/' + item.address">
@@ -62,6 +63,7 @@
 import agent from '@/utils/agent'
 import format from '@/mixins/format'
 import Pagination from '@/components/Pagination.vue'
+import LoadingTableBody from '@/components/LoadingTableBody.vue'
 
 export default {
   metaInfo () {
@@ -71,14 +73,16 @@ export default {
   },
   mixins: [format],
   components: {
-    Pagination
+    Pagination,
+    LoadingTableBody
   },
   data () {
     return {
       addresses: [],
       sort: '-volume',
       page: 1,
-      accumulate: null
+      accumulate: null,
+      loading: false
     }
   },
   created () {
@@ -89,12 +93,14 @@ export default {
       return Math.ceil((value / this.accumulate[type]) * 10000) / 100
     },
     async submit () {
+      this.loading = true
       const { data } = await agent.get('/api/dash/topAddresses', {
         params: {
           sort: this.sort,
           page: this.page
         }
       })
+      this.loading = false
 
       this.addresses = data.result
 
