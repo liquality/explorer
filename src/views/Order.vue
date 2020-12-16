@@ -1,16 +1,15 @@
 <template>
   <div class="row">
     <div class="col-md-8">
-      <h1 class="h4 mb-4">Order Details</h1>
+      <h1 class="h4 mb-1">Order</h1>
+      <p class="lead font-weight-light text-muted">
+        {{orderId}}
+      </p>
       <div class="card border-top-0 mb-5">
         <div class="table-responsive">
           <table class="table bg-white m-0 table-order-details">
             <LoadingTableBody :trCount="20" :tdCount="2" v-if="!order" />
             <tbody class="font-weight-normal" v-else>
-              <tr>
-                <td class="text-muted text-right small-12">Order ID</td>
-                <td><router-link :to="'/order/' + order.orderId">{{order.orderId}}</router-link></td>
-              </tr>
               <tr>
                 <td class="text-muted text-right small-12">User Agent</td>
                 <td>{{order.userAgent === 'wallet' ? 'Wallet' : 'UI'}}</td>
@@ -47,6 +46,12 @@
                       'text-success': changeInMarketRate >= 0
                     }">{{changeInMarketRate}}%</span>
                   </span>
+                </td>
+              </tr>
+              <tr>
+                <td class="text-muted text-right small-12">Cost of Swap</td>
+                <td>
+                  ${{formatAmount(order.totalFeeUsd, 'USD')}} <span class="text-muted">(Agent: ${{formatAmount(order.totalAgentFeeUsd, 'USD')}}, User: ${{formatAmount(order.totalUserFeeUsd, 'USD')}})</span>
                 </td>
               </tr>
               <tr>
@@ -116,18 +121,6 @@
                 </td>
               </tr>
               <tr>
-                <td class="text-muted text-right small-12">Total Tx Fees<br>Agent Paid</td>
-                <td>
-                  ${{formatAmount(agentFees, 'USD')}}
-                </td>
-              </tr>
-              <tr>
-                <td class="text-muted text-right small-12">Total Tx Fees<br>User Paid</td>
-                <td>
-                  ${{formatAmount(userFees, 'USD')}}
-                </td>
-              </tr>
-              <tr>
                 <td class="text-muted text-right small-12">Status</td>
                 <td>{{order.status}}</td>
               </tr>
@@ -138,31 +131,25 @@
               <tr v-if="order.fromAddress">
                 <td class="text-muted text-right small-12">User's {{order.from}}<br>address</td>
                 <td>
-                  <router-link :to="'/address/' + formatAddress(order.fromAddress, order.from)">
-                    {{formatAddress(order.fromAddress, order.from)}}
-                  </router-link>
-                  <small class="d-block text-muted" v-if="statsByAddresses[order.fromAddress] && statsByAddresses[order.fromAddress].count > 0">
+                  <a :href="formatAddressLink(order.fromAddress, order.from)" target="_blank" rel="noopener">{{formatAddress(order.fromAddress, order.from)}}</a>
+                  <router-link :to="'/address/' + formatAddress(order.fromAddress, order.from)" class="d-block text-muted small" v-if="statsByAddresses[order.fromAddress] && statsByAddresses[order.fromAddress].count > 0">
                     {{statsByAddresses[order.fromAddress].count}} {{formatPlural(statsByAddresses[order.fromAddress].count, 'order', 'orders')}} worth ${{formatAmount(statsByAddresses[order.fromAddress]['sum:fromAmountUsd'], 'USD')}}
-                  </small>
+                  </router-link>
                 </td>
               </tr>
               <tr v-if="order.toAddress">
                 <td class="text-muted text-right small-12">User's {{order.to}}<br>address</td>
                 <td>
-                  <router-link :to="'/address/' + formatAddress(order.toAddress, order.to)">
-                    {{formatAddress(order.toAddress, order.to)}}
-                  </router-link>
-                  <small class="d-block text-muted" v-if="order.fromAddress !== order.toAddress && statsByAddresses[order.toAddress] && statsByAddresses[order.toAddress].count > 0">
+                  <a :href="formatAddressLink(order.toAddress, order.to)" target="_blank" rel="noopener">{{formatAddress(order.toAddress, order.to)}}</a>
+                  <router-link :to="'/address/' + formatAddress(order.toAddress, order.to)" class="d-block text-muted small" v-if="order.fromAddress !== order.toAddress && statsByAddresses[order.toAddress] && statsByAddresses[order.toAddress].count > 0">
                     {{statsByAddresses[order.toAddress].count}} {{formatPlural(statsByAddresses[order.toAddress].count, 'order', 'orders')}} worth ${{formatAmount(statsByAddresses[order.toAddress]['sum:fromAmountUsd'], 'USD')}}
-                  </small>
+                  </router-link>
                 </td>
               </tr>
               <tr v-if="order.fromCounterPartyAddress">
                 <td class="text-muted text-right small-12">Agent's {{order.from}}<br>address</td>
                 <td>
-                  <router-link :to="'/address/' + formatAddress(order.fromCounterPartyAddress, order.from)">
-                    {{formatAddress(order.fromCounterPartyAddress, order.from)}}
-                  </router-link>
+                  <a :href="formatAddressLink(order.fromAddress, order.from)" target="_blank" rel="noopener">{{formatAddress(order.fromAddress, order.from)}}</a>
                 </td>
               </tr>
               <tr v-if="order.toCounterPartyAddress">
@@ -307,26 +294,6 @@ export default {
     }
   },
   computed: {
-    agentFees () {
-      let fees = 0
-
-      fees += this.getFeeForTxType('toFundHash')
-      fees += this.getFeeForTxType('toSecondaryFundHash')
-      fees += this.getFeeForTxType('fromClaimHash')
-      fees += this.getFeeForTxType('toRefundHash')
-
-      return fees
-    },
-    userFees () {
-      let fees = 0
-
-      fees += this.getFeeForTxType('fromFundHash')
-      fees += this.getFeeForTxType('fromSecondaryFundHash')
-      fees += this.getFeeForTxType('toClaimHash')
-      fees += this.getFeeForTxType('fromRefundHash')
-
-      return fees
-    },
     orderId () {
       return this.$route.params.orderId
     },
@@ -409,16 +376,6 @@ export default {
     },
     percProfit (from, to) {
       return Math.ceil(((from - to) / from) * 10000) / 100
-    },
-    getFeeForTxType (type) {
-      const tx = this.order[type]
-
-      if (tx && this.order.txMap) {
-        const obj = this.order.txMap[tx]
-        if (obj) return obj.feeAmountUsd
-      }
-
-      return 0
     }
   },
   async created () {
@@ -512,25 +469,6 @@ export default {
 </script>
 
 <style lang="scss">
-.time-diff {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 8px;
-  height: 8px;
-  background: $blue-light-3;
-  border-radius: 50%;
-  margin-left: 1px;
-  margin-right: 21px;
-
-  div {
-    width: 4px;
-    height: 4px;
-    background: $body-bg;
-    border-radius: 50%;
-  }
-}
-
 .table-order-details {
   td {
     vertical-align: middle;
@@ -545,88 +483,6 @@ export default {
   .loading-table {
     tr > td:first-child {
       width: 20%;
-    }
-  }
-}
-
-.order-timeline {
-  position: relative;
-
-  > div:last-child {
-    z-index: 1;
-
-    &:after {
-      display: block;
-      content: '';
-      position: absolute;
-      left: 2px;
-      top: 0;
-      bottom: 0;
-      width: 4px;
-      border-left: 6px solid $body-bg;
-      z-index: -1;
-    }
-  }
-
-  &:before {
-    display: block;
-    content: '';
-    position: absolute;
-    left: 14px;
-    top: 0;
-    bottom: 0;
-    width: 1px;
-    border-left: 2px solid $blue-light-3;
-  }
-
-  .card {
-    background: transparent;
-    margin-left: 10px;
-    border: 0;
-  }
-
-  .card + .card, .card-body + .card-body {
-    margin-top: 1.5rem;
-  }
-
-  svg {
-    height: 30px;
-    margin: -1px 10px -10px -10px;
-    border: 2px solid $blue-light-3;
-    border-radius: 50%;
-    background: $body-bg;
-    flex-shrink: 0;
-  }
-
-  .primary {
-    fill: $body-bg;
-  }
-
-  .invert-icon-colors {
-    .primary {
-      fill: $blue-dark-5;
-    }
-
-    .secondary {
-      fill: $body-bg;
-    }
-
-    svg {
-      border-color: $blue-dark-5;
-      background: $blue-dark-5;
-    }
-  }
-
-  .card-body {
-    padding: 0;
-
-    > div {
-      display: flex;
-      align-items: flex-start;
-
-      &:nth-child(2) {
-        margin-left: 30px;
-      }
     }
   }
 }

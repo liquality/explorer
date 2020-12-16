@@ -381,7 +381,7 @@ export default {
       arr.sort((a, b) => b[1]['sum:fromAmountUsd'] - a[1]['sum:fromAmountUsd'])
 
       returnValue.markets = arr
-      returnValue.summary['average:fromAmountUsd'] = Math.ceil((returnValue.summary['sum:fromAmountUsd'] / returnValue.summary.count) * 100) / 100
+      returnValue.summary['average:fromAmountUsd'] = (Math.ceil((returnValue.summary['sum:fromAmountUsd'] / returnValue.summary.count) * 100) / 100) || 0
       returnValue.summary['ui:sum:fromAmountUsd'] = returnValue.summary['sum:fromAmountUsd'] - returnValue.summary['wallet:sum:fromAmountUsd']
 
       return returnValue

@@ -1,7 +1,9 @@
 <template>
   <div>
     <h1 class="h4 mb-1">Address Details</h1>
-    <p class="lead font-weight-light text-muted">{{address}}</p>
+    <p class="lead font-weight-light text-muted">
+      {{address}}
+    </p>
 
     <DataViz :address="address" class="mb-5" />
 

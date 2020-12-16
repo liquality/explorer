@@ -3,47 +3,47 @@
   <div class="card font-weight-normal" v-for="(audit, idx) in auditLogs" :key="audit._id">
     <div class="card-body">
       <div v-if="audit.orderStatus === 'QUOTE'">
-        <Check />
+        <User class="icon-user" />
         <p class="mb-0">User requested a quote</p>
       </div>
       <div v-else-if="audit.context === 'SWAP_UPDATE'">
-        <Check />
+        <User class="icon-user" />
         <p class="mb-0">User has informed the agent about the funding transaction</p>
       </div>
-      <div v-else-if="audit.context === 'VERIFY_USER_INIT_TX' && audit.status === 'USER_FUNDING_NOT_FOUND'" class="invert-icon-colors">
-        <Check />
+      <div v-else-if="audit.context === 'VERIFY_USER_INIT_TX' && audit.status === 'USER_FUNDING_NOT_FOUND'">
+        <User class="icon-user" />
         <p class="mb-0">Agent is looking for user's funding transaction</p>
       </div>
-      <div v-else-if="audit.context === 'VERIFY_USER_INIT_TX' && audit.status === 'USER_FUNDING_NEED_MORE_CONF'" class="invert-icon-colors">
-        <Check />
+      <div v-else-if="audit.context === 'VERIFY_USER_INIT_TX' && audit.status === 'USER_FUNDING_NEED_MORE_CONF'">
+        <User class="icon-user" />
         <p class="mb-0">Agent is waiting for {{audit.extra.minConf}} {{ audit.extra.minConf === 1 ? 'confirmation' : 'confirmations' }} on user's funding transaction</p>
       </div>
-      <div v-else-if="audit.orderStatus === 'USER_FUNDED'" class="invert-icon-colors">
-        <Check />
+      <div v-else-if="audit.orderStatus === 'USER_FUNDED'">
+        <Robot />
         <p class="mb-0">Agent has confirmed user's funding transaction</p>
       </div>
-      <div v-else-if="audit.context === 'RECIPROCATE_INIT_SWAP'" class="invert-icon-colors">
-        <Check />
+      <div v-else-if="audit.context === 'RECIPROCATE_INIT_SWAP'">
+        <Robot />
         <p class="mb-0">Agent has reciprocated funding transaction</p>
       </div>
-      <div v-else-if="audit.status === 'AGENT_CLAIM_WAITING'" class="invert-icon-colors">
-        <Check />
+      <div v-else-if="audit.status === 'AGENT_CLAIM_WAITING'">
+        <Robot />
         <p class="mb-0">Agent is waiting for user to claim</p>
       </div>
       <div v-else-if="audit.orderStatus === 'USER_CLAIMED'">
-        <Check />
+        <User class="icon-user" />
         <p class="mb-0">User has claimed agent's funding transaction</p>
       </div>
-      <div v-else-if="audit.orderStatus === 'AGENT_CLAIMED'" class="invert-icon-colors">
-        <Check />
+      <div v-else-if="audit.orderStatus === 'AGENT_CLAIMED'">
+        <Robot />
         <p class="mb-0">Agent has claimed user's funding transaction</p>
       </div>
-      <div v-else-if="audit.orderStatus === 'AGENT_REFUNDED'" class="invert-icon-colors">
-        <Check />
+      <div v-else-if="audit.orderStatus === 'AGENT_REFUNDED'">
+        <Robot />
         <p class="mb-0">Agent has refunded</p>
       </div>
       <div v-else>
-        <Check />
+        <User class="icon-user" />
         <p class="mb-0">
           <time :datetime="audit.createdAt">{{audit.createdAt}}</time> - {{audit.orderStatus}} - {{audit.status}} - {{audit.context}}
           <br>
@@ -72,12 +72,14 @@
 
 <script>
 import format from '@/mixins/format'
-import Check from '@/components/Icons/Check.vue'
+import User from '@/components/Icons/User.vue'
+import Robot from '@/components/Icons/Robot.vue'
 
 export default {
   mixins: [format],
   components: {
-    Check
+    User,
+    Robot
   },
   props: {
     auditLogs: Array,
@@ -87,3 +89,90 @@ export default {
   }
 }
 </script>
+
+<style lang="scss">
+.order-timeline {
+  position: relative;
+
+  .time-diff {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 8px;
+    height: 8px;
+    background: $blue-light-4;
+    border-radius: 50%;
+    margin-left: 1px;
+    margin-right: 21px;
+
+    div {
+      width: 4px;
+      height: 4px;
+      background: $body-bg;
+      border-radius: 50%;
+    }
+  }
+
+  > div:last-child {
+    z-index: 1;
+
+    &:after {
+      display: block;
+      content: '';
+      position: absolute;
+      left: 2px;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      border-left: 6px solid $body-bg;
+      z-index: -1;
+    }
+  }
+
+  &:before {
+    display: block;
+    content: '';
+    position: absolute;
+    left: 14px;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    border-left: 2px solid $blue-light-4;
+  }
+
+  .card {
+    background: transparent;
+    margin-left: 10px;
+    border: 0;
+  }
+
+  .card + .card, .card-body + .card-body {
+    margin-top: 1.5rem;
+  }
+
+  .card-body {
+    padding: 0;
+
+    > div {
+      display: flex;
+      align-items: flex-start;
+
+      &:nth-child(2) {
+        margin-left: 34px;
+      }
+    }
+  }
+
+  svg {
+    height: 34px;
+    margin: -4px 10px -10px -12px;
+    padding: 4px;
+    background: $body-bg;
+    flex-shrink: 0;
+  }
+
+  .icon-user {
+    margin-left: -9px;
+  }
+}
+</style>

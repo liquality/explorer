@@ -32,6 +32,12 @@ const EXPLORER_MAP = {
     address: 'https://etherscan.io/address/',
     block: 'https://etherscan.io/block/',
     formatter: value => value.startsWith('0x') ? value : `0x${value}`
+  },
+  RBTC: {
+    tx: 'https://blockscout.com/rsk/mainnet/tx/',
+    address: 'https://blockscout.com/rsk/mainnet/address/',
+    block: 'https://blockscout.com/rsk/mainnet/blocks/',
+    formatter: value => value.startsWith('0x') ? value : `0x${value}`
   }
 }
 
@@ -101,6 +107,10 @@ export default {
     formatBlockLink (block, asset) {
       const obj = EXPLORER_MAP[asset] || EXPLORER_MAP.ETH
       return obj.block + obj.formatter(block)
+    },
+    formatAddressLink (address, asset) {
+      const obj = EXPLORER_MAP[asset] || EXPLORER_MAP.ETH
+      return obj.address + obj.formatter(address)
     },
     formatPlural (number, singular, plural) {
       return number === 1 ? singular : plural
