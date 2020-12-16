@@ -4,12 +4,12 @@
       <span class="nav-link small">Pending Txs</span>
       <span :class="{
         'nav-link': true,
-        active: pending.includes('USER_FUNDED')
-      }" @click="setPending('USER_FUNDED')">Agent</span>
+        active: pending.includes('USER')
+      }" @click="setPending('USER')">Agent</span>
       <span :class="{
         'nav-link d-flex align-items-center': true,
-        active: pending.includes('USER_FUNDED_UNVERIFIED')
-      }" @click="setPending('USER_FUNDED_UNVERIFIED')">User</span>
+        active: pending.includes('AGENT')
+      }" @click="setPending('AGENT')">User</span>
     </nav>
 
     <nav class="nav flex-column mb-3">
@@ -21,7 +21,7 @@
       <span :class="{
         'nav-link d-flex align-items-center': true,
         active: status.includes('USER_FUNDED_UNVERIFIED')
-      }" @click="setStatus('USER_FUNDED_UNVERIFIED')">Funded <small class="ml-2 text-muted">Pending</small></span>
+      }" @click="setStatus('USER_FUNDED_UNVERIFIED')">Funded <sup class="ml-2 text-muted">Pending</sup></span>
       <span :class="{
         'nav-link': true,
         active: status.includes('USER_CLAIMED')
@@ -35,25 +35,13 @@
         active: status.includes('AGENT_FUNDED')
       }" @click="setStatus('AGENT_FUNDED')">Funded</span>
       <span :class="{
-        'nav-link d-flex align-items-center': true,
-        active: status.includes('AGENT_FUNDED_UNVERIFIED')
-      }" @click="setStatus('AGENT_FUNDED_UNVERIFIED')">Funded <small class="ml-2 text-muted">Pending</small></span>
-      <span :class="{
         'nav-link': true,
         active: status.includes('AGENT_CLAIMED')
       }" @click="setStatus('AGENT_CLAIMED')">Claimed</span>
       <span :class="{
-        'nav-link d-flex align-items-center': true,
-        active: status.includes('AGENT_CLAIMED_UNVERIFIED')
-      }" @click="setStatus('AGENT_CLAIMED_UNVERIFIED')">Claimed <small class="ml-2 text-muted">Pending</small></span>
-      <span :class="{
         'nav-link': true,
         active: status.includes('AGENT_REFUNDED')
       }" @click="setStatus('AGENT_REFUNDED')">Refunded</span>
-      <span :class="{
-        'nav-link d-flex align-items-center': true,
-        active: status.includes('AGENT_REFUNDED_UNVERIFIED')
-      }" @click="setStatus('AGENT_REFUNDED_UNVERIFIED')">Refunded <small class="ml-2 text-muted">Pending</small></span>
     </nav>
 
     <nav class="nav flex-column mb-3">
@@ -118,7 +106,7 @@ export default {
   },
   methods: {
     safeEmit () {
-      this.$emit('update', { status: this.status, from: this.fromMarkets, to: this.toMarkets, userAgent: this.userAgent })
+      this.$emit('update', { status: this.status, from: this.fromMarkets, to: this.toMarkets, userAgent: this.userAgent, pending: this.pending })
     },
     setStatus (status) {
       if (this.status.includes(status)) {
