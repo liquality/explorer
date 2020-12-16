@@ -6,7 +6,7 @@
           <td scope="col" :class="{
             'text-muted': true,
             'cursor-pointer': !noSort
-          }" @click="setSort('createdAt')">
+          }" @click="!loading && setSort('createdAt')">
             When
             <span v-if="!noSort">
               <span v-if="sort === 'createdAt'">&#8595;</span>
@@ -16,7 +16,7 @@
           <td scope="col" :class="{
             'text-muted': true,
             'cursor-pointer': !noSort
-          }" @click="setSort('fromAmountUsd')">
+          }" @click="!loading && setSort('fromAmountUsd')">
             Value
             <span v-if="!noSort">
               <span v-if="sort === 'fromAmountUsd'">&#8595;</span>
@@ -28,7 +28,8 @@
           <td scope="col" class="text-muted">Status</td>
         </tr>
       </thead>
-      <tbody class="font-weight-normal">
+      <LoadingTableBody :trCount="25" :tdCount="9" v-if="loading" />
+      <tbody class="font-weight-normal" v-else>
         <tr v-for="item in list" :key="item.orderId" :class="{
           'unconfirmed-tx': item.hasUnconfirmedTx
         }">
@@ -87,8 +88,10 @@
 
 <script>
 import format from '@/mixins/format'
+import LoadingTableBody from './LoadingTableBody.vue'
 
 export default {
+  components: { LoadingTableBody },
   data () {
     return {
       sort: '-createdAt'
@@ -100,6 +103,9 @@ export default {
       type: Array
     },
     noSort: {
+      type: Boolean
+    },
+    loading: {
       type: Boolean
     }
   },

@@ -6,7 +6,7 @@
         <Filters @update="filters = $event" />
       </div>
       <div class="col-md-10">
-        <OrderList :list="swaps" class="mb-3" @sort="sort = $event" />
+        <OrderList :list="swaps" class="mb-3" @sort="sort = $event" :loading="loading" />
 
         <Pagination
           :page="page"
@@ -41,7 +41,8 @@ export default {
       swaps: [],
       page: 1,
       sort: '-createdAt',
-      filters: {}
+      filters: {},
+      loading: true
     }
   },
   computed: {
@@ -52,6 +53,8 @@ export default {
   methods: {
     safeBrowse: debounce(function () { this.browse() }, 500),
     async browse () {
+      this.loading = true
+
       const { data } = await agent.get('/api/dash/orders', {
         params: {
           ...this.filters,
@@ -60,6 +63,8 @@ export default {
           q: this.query
         }
       })
+
+      this.loading = false
 
       this.swaps = data.result
     }

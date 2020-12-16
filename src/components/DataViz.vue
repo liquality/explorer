@@ -27,43 +27,43 @@
     <div class="row justify-content-center mb-4">
       <div class="col-md-3 mb-3">
         <div class="card">
-          <LoadingCardBody v-if="!summary" />
+          <LoadingCardBody v-if="!summary || loading" />
           <SummaryCard v-else heading="Incoming Volume" :summary="summary" type="sum:fromAmountUsd" />
         </div>
       </div>
       <div class="col-md-3 mb-3">
         <div class="card">
-          <LoadingCardBody v-if="!summary" />
+          <LoadingCardBody v-if="!summary || loading" />
           <SummaryCard v-else heading="Number of Swaps" :summary="summary" type="count" />
         </div>
       </div>
       <div class="col-md-3 mb-3">
         <div class="card">
-          <LoadingCardBody v-if="!summary" />
+          <LoadingCardBody v-if="!summary || loading" />
           <SummaryCard v-else heading="Average Value" :summary="summary" type="average:fromAmountUsd" />
         </div>
       </div>
       <div class="col-md-3 mb-3">
         <div class="card">
-          <LoadingCardBody v-if="!summary" />
+          <LoadingCardBody v-if="!summary || loading" />
           <SummaryCard v-else heading="Tx Fee" :summary="summary" type="sum:totalAgentFeeUsd" />
         </div>
       </div>
       <div class="col-md-3 mb-3">
         <div class="card">
-          <LoadingCardBody v-if="!summary" />
+          <LoadingCardBody v-if="!summary || loading" />
           <SummaryCard v-else heading="Profit/Loss" :summary="summary" type="sum:totalFromToAmountUsdDiffWithFees" />
         </div>
       </div>
       <div class="col-md-3 mb-3">
         <div class="card">
-          <LoadingCardBody v-if="!summary" />
+          <LoadingCardBody v-if="!summary || loading" />
           <SummaryCard v-else heading="Wallet Volume" :summary="summary" type="wallet:sum:fromAmountUsd" />
         </div>
       </div>
       <div class="col-md-3 mb-3">
         <div class="card">
-          <LoadingCardBody v-if="!summary" />
+          <LoadingCardBody v-if="!summary || loading" />
           <SummaryCard v-else heading="UI Value" :summary="summary" type="ui:sum:fromAmountUsd" />
         </div>
       </div>
@@ -72,7 +72,7 @@
     <div class="row">
       <div class="col-md-6">
         <div class="card mb-4">
-          <LoadingChart v-if="!lineCharts" />
+          <LoadingChart v-if="!lineCharts || loading" />
           <div class="card-body" v-else>
             <h2 class="h6 mb-4 font-weight-light text-muted">Incoming Volume</h2>
             <LineChart :chartData="lineCharts['sum:fromAmountUsd'].data" :compareLabels="lineCharts['sum:fromAmountUsd'].compareLabels" :height="300" :usd="true" />
@@ -81,7 +81,7 @@
       </div>
       <div class="col-md-6">
         <div class="card mb-4">
-          <LoadingChart v-if="!lineCharts" />
+          <LoadingChart v-if="!lineCharts || loading" />
           <div class="card-body" v-else>
             <h2 class="h6 mb-4 font-weight-light text-muted">Number of Swaps</h2>
             <LineChart :chartData="lineCharts['count'].data" :compareLabels="lineCharts['count'].compareLabels" :height="300" />
@@ -90,7 +90,7 @@
       </div>
       <div class="col-md-6">
         <div class="card mb-4">
-          <LoadingChart v-if="!lineCharts" />
+          <LoadingChart v-if="!lineCharts || loading" />
           <div class="card-body" v-else>
             <h2 class="h6 mb-4 font-weight-light text-muted">Profit/Loss</h2>
             <LineChart :chartData="lineCharts['sum:totalFromToAmountUsdDiffWithFees'].data" :compareLabels="lineCharts['sum:totalFromToAmountUsdDiffWithFees'].compareLabels" :height="300" :usd="true" />
@@ -99,7 +99,7 @@
       </div>
       <div class="col-md-6">
         <div class="card mb-4">
-          <LoadingChart v-if="!lineCharts" />
+          <LoadingChart v-if="!lineCharts || loading" />
           <div class="card-body" v-else>
             <h2 class="h6 mb-4 font-weight-light text-muted">Tx Fees</h2>
             <LineChart :chartData="lineCharts['sum:totalAgentFeeUsd'].data" :compareLabels="lineCharts['sum:totalAgentFeeUsd'].compareLabels" :height="300" :usd="true" />
@@ -108,7 +108,7 @@
       </div>
       <div class="col-md-6" v-if="topMarketsByVolumeChart">
         <div class="card">
-          <LoadingChart v-if="!lineCharts" />
+          <LoadingChart v-if="!lineCharts || loading" />
           <div class="card-body" v-else>
             <h2 class="h6 mb-4 font-weight-light text-muted">Top 5 Markets By Incoming Volume</h2>
             <BarChart :chartData="topMarketsByVolumeChart" :height="300" key="marketChart" />
@@ -117,7 +117,7 @@
       </div>
       <div class="col-md-6" v-if="volumeByApplicationsChart">
         <div class="card">
-          <LoadingChart v-if="!lineCharts" />
+          <LoadingChart v-if="!lineCharts || loading" />
           <div class="card-body" v-else>
             <h2 class="h6 mb-4 font-weight-light text-muted">Incoming Volume By Application</h2>
             <BarChart :chartData="volumeByApplicationsChart" :height="300" key="walletChart" />
@@ -177,7 +177,8 @@ export default {
       profitLossChart: null,
       lineCharts: null,
       topMarketsByVolumeChart: null,
-      volumeByApplicationsChart: null
+      volumeByApplicationsChart: null,
+      loading: false
     }
   },
   computed: {
@@ -209,7 +210,9 @@ export default {
   },
   methods: {
     async fillData () {
+      this.loading = true
       const [current, compare] = await Promise.all([this.getData(this.range), this.getData(this.range.compare)])
+      this.loading = false
 
       this.summary = {
         current: current.summary,

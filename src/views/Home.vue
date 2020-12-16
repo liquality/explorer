@@ -7,7 +7,7 @@
       <router-link to="/browse" class="small ml-3">Browse &rsaquo;</router-link>
     </h2>
 
-    <OrderList :list="history" noSort />
+    <OrderList :list="history" noSort :loading="loading" />
   </div>
 </template>
 
@@ -23,10 +23,13 @@ export default {
   },
   data () {
     return {
-      history: []
+      history: [],
+      loading: false
     }
   },
   async created () {
+    this.loading = true
+
     const { data } = await agent.get('/api/dash/orders', {
       params: {
         start: 0,
@@ -34,6 +37,8 @@ export default {
         excludeStatus: ['QUOTE']
       }
     })
+
+    this.loading = false
 
     this.history = data.result
   }

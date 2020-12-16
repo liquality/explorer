@@ -1,273 +1,270 @@
 <template>
-  <div v-if="order">
-    <div class="row">
-      <div class="col-md-8">
-        <h1 class="h4 mb-4">Order Details</h1>
-        <div class="card border-top-0 mb-5">
-          <div class="table-responsive">
-            <table class="table bg-white m-0 table-order-details">
-              <tbody class="font-weight-normal">
-                <tr>
-                  <td class="text-muted text-right small-12">Order ID</td>
-                  <td><router-link :to="'/order/' + order.orderId">{{order.orderId}}</router-link></td>
-                </tr>
-                <tr>
-                  <td class="text-muted text-right small-12">User Agent</td>
-                  <td>{{order.userAgent === 'wallet' ? 'Wallet' : 'UI'}}</td>
-                </tr>
-                <tr>
-                  <td class="text-muted text-right small-12">Amount</td>
-                  <td>
-                    {{formatAmount(order.fromAmount, order.from, true)}} {{order.from}}
+  <div class="row">
+    <div class="col-md-8">
+      <h1 class="h4 mb-4">Order Details</h1>
+      <div class="card border-top-0 mb-5">
+        <div class="table-responsive">
+          <table class="table bg-white m-0 table-order-details">
+            <LoadingTableBody :trCount="20" :tdCount="2" v-if="!order" />
+            <tbody class="font-weight-normal" v-else>
+              <tr>
+                <td class="text-muted text-right small-12">Order ID</td>
+                <td><router-link :to="'/order/' + order.orderId">{{order.orderId}}</router-link></td>
+              </tr>
+              <tr>
+                <td class="text-muted text-right small-12">User Agent</td>
+                <td>{{order.userAgent === 'wallet' ? 'Wallet' : 'UI'}}</td>
+              </tr>
+              <tr>
+                <td class="text-muted text-right small-12">Amount</td>
+                <td>
+                  {{formatAmount(order.fromAmount, order.from, true)}} {{order.from}}
+                  <span class="font-weight-bold text-muted mx-1">&rsaquo;</span>
+                  {{formatAmount(order.toAmount, order.to, true)}} {{order.to}}
+                </td>
+              </tr>
+              <tr>
+                <td class="text-muted text-right small-12">Time</td>
+                <td>
+                  {{formatDate(order.createdAt)}}
+                  <span v-if="!isEqual((order.createdAt), (order.updatedAt)) && order.updatedAt">
                     <span class="font-weight-bold text-muted mx-1">&rsaquo;</span>
-                    {{formatAmount(order.toAmount, order.to, true)}} {{order.to}}
-                  </td>
-                </tr>
-                <tr>
-                  <td class="text-muted text-right small-12">Time</td>
-                  <td>
-                    {{formatDate(order.createdAt)}}
-                    <span v-if="!isEqual((order.createdAt), (order.updatedAt)) && order.updatedAt">
-                      <span class="font-weight-bold text-muted mx-1">&rsaquo;</span>
-                      {{formatDate(order.updatedAt)}}
-                      <span class="ml-1 text-success">{{formatDurationStrict((order.createdAt), (order.updatedAt), false)}}</span>
+                    {{formatDate(order.updatedAt)}}
+                    <span class="ml-1 text-success">{{formatDurationStrict((order.createdAt), (order.updatedAt), false)}}</span>
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <td class="text-muted text-right small-12">Rate</td>
+                <td>
+                  1 {{order.from}} = {{formatAssetValue(order.rate, order.to)}} {{order.to}}
+                  <span v-if="latestMarketRate">
+                    <span class="text-muted mx-1">&rsaquo;</span>
+                    {{formatAssetValue(latestMarketRate, order.to)}}
+                    <span :class="{
+                      'ml-1': true,
+                      'text-danger': changeInMarketRate < 0,
+                      'text-success': changeInMarketRate >= 0
+                    }">{{changeInMarketRate}}%</span>
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <td class="text-muted text-right small-12">{{order.from}}/USD</td>
+                <td>
+                  ${{formatAmount(order.fromRateUsd, 'USD')}}
+                </td>
+              </tr>
+              <tr>
+                <td class="text-muted text-right small-12">{{order.to}}/USD</td>
+                <td>
+                  ${{formatAmount(order.toRateUsd, 'USD')}}
+                </td>
+              </tr>
+              <tr>
+                <td class="text-muted text-right small-12">{{order.from}} Value</td>
+                <td>
+                  ${{formatAmount(order.fromAmountUsd, 'USD')}}
+                  <span v-if="latestfromAmountUsd">
+                    <span class="text-muted mx-1">&rsaquo;</span>
+                    <span>
+                      ${{formatAmount(latestfromAmountUsd, 'USD')}}
+                      <span class="ml-1" :class="{
+                        'text-danger': changeInfromAmountUsd < 0,
+                        'text-success': changeInfromAmountUsd >= 0
+                      }">{{changeInfromAmountUsd}}%</span>
                     </span>
-                  </td>
-                </tr>
-                <tr>
-                  <td class="text-muted text-right small-12">Rate</td>
-                  <td>
-                    1 {{order.from}} = {{formatAssetValue(order.rate, order.to)}} {{order.to}}
-                    <span v-if="latestMarketRate">
-                      <span class="text-muted mx-1">&rsaquo;</span>
-                      {{formatAssetValue(latestMarketRate, order.to)}}
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <td class="text-muted text-right small-12">{{order.to}} Value</td>
+                <td>
+                  ${{formatAmount(order.toAmountUsd, 'USD')}}
+                  <span v-if="latesttoAmountUsd">
+                    <span class="text-muted mx-1">&rsaquo;</span>
+                    <span>
+                      ${{formatAmount(latesttoAmountUsd, 'USD')}}
                       <span :class="{
                         'ml-1': true,
-                        'text-danger': changeInMarketRate < 0,
-                        'text-success': changeInMarketRate >= 0
-                      }">{{changeInMarketRate}}%</span>
+                        'text-danger': changeIntoAmountUsd < 0,
+                        'text-success': changeIntoAmountUsd >= 0
+                      }">{{changeIntoAmountUsd}}%</span>
                     </span>
-                  </td>
-                </tr>
-                <tr>
-                  <td class="text-muted text-right small-12">{{order.from}}/USD</td>
-                  <td>
-                    ${{formatAmount(order.fromRateUsd, 'USD')}}
-                  </td>
-                </tr>
-                <tr>
-                  <td class="text-muted text-right small-12">{{order.to}}/USD</td>
-                  <td>
-                    ${{formatAmount(order.toRateUsd, 'USD')}}
-                  </td>
-                </tr>
-                <tr>
-                  <td class="text-muted text-right small-12">{{order.from}} Value</td>
-                  <td>
-                    ${{formatAmount(order.fromAmountUsd, 'USD')}}
-                    <span v-if="latestfromAmountUsd">
-                      <span class="text-muted mx-1">&rsaquo;</span>
-                      <span>
-                        ${{formatAmount(latestfromAmountUsd, 'USD')}}
-                        <span class="ml-1" :class="{
-                          'text-danger': changeInfromAmountUsd < 0,
-                          'text-success': changeInfromAmountUsd >= 0
-                        }">{{changeInfromAmountUsd}}%</span>
-                      </span>
-                    </span>
-                  </td>
-                </tr>
-                <tr>
-                  <td class="text-muted text-right small-12">{{order.to}} Value</td>
-                  <td>
-                    ${{formatAmount(order.toAmountUsd, 'USD')}}
-                    <span v-if="latesttoAmountUsd">
-                      <span class="text-muted mx-1">&rsaquo;</span>
-                      <span>
-                        ${{formatAmount(latesttoAmountUsd, 'USD')}}
-                        <span :class="{
-                          'ml-1': true,
-                          'text-danger': changeIntoAmountUsd < 0,
-                          'text-success': changeIntoAmountUsd >= 0
-                        }">{{changeIntoAmountUsd}}%</span>
-                      </span>
-                    </span>
-                  </td>
-                </tr>
-                <tr>
-                  <td class="text-muted text-right small-12">USD Difference</td>
-                  <td>
-                    <span :class="{
-                      'text-danger': percProfit(order.fromAmountUsd, order.toAmountUsd) < 0,
-                      'text-success': percProfit(order.fromAmountUsd, order.toAmountUsd) >= 0
-                    }">${{formatAmount(order.fromAmountUsd - order.toAmountUsd, 'USD')}} ({{percProfit(order.fromAmountUsd, order.toAmountUsd)}}%)</span>
-                    <span class="text-muted mx-2">&rsaquo;</span>
-                    <span :class="{
-                      'text-danger': percProfit(latestfromAmountUsd, latesttoAmountUsd) < 0,
-                      'text-success': percProfit(latestfromAmountUsd, latesttoAmountUsd) >= 0
-                    }">${{formatAmount(latestfromAmountUsd - latesttoAmountUsd, 'USD')}} ({{percProfit(latestfromAmountUsd, latesttoAmountUsd)}}%)</span>
-                    <span class="text-muted mx-2">&rsaquo;</span>
-                    <span :class="{
-                      'text-danger': (latestfromAmountUsd - latesttoAmountUsd - (order.fromAmountUsd - order.toAmountUsd)) < 0,
-                      'text-success': (latestfromAmountUsd - latesttoAmountUsd - (order.fromAmountUsd - order.toAmountUsd)) >= 0
-                    }">
-                      ${{formatAmount(latestfromAmountUsd - latesttoAmountUsd - (order.fromAmountUsd - order.toAmountUsd), 'USD')}}
-                    </span>
-                  </td>
-                </tr>
-                <tr>
-                  <td class="text-muted text-right small-12">Total Tx Fees<br>Agent Paid</td>
-                  <td>
-                    ${{formatAmount(agentFees, 'USD')}}
-                  </td>
-                </tr>
-                <tr>
-                  <td class="text-muted text-right small-12">Total Tx Fees<br>User Paid</td>
-                  <td>
-                    ${{formatAmount(userFees, 'USD')}}
-                  </td>
-                </tr>
-                <tr>
-                  <td class="text-muted text-right small-12">Status</td>
-                  <td>{{order.status}}</td>
-                </tr>
-                <tr v-if="order.secretHash">
-                  <td class="text-muted text-right small-12">Secret Hash</td>
-                  <td>{{formatTxHash(order.secretHash, 'ETH')}}</td>
-                </tr>
-                <tr v-if="order.fromAddress">
-                  <td class="text-muted text-right small-12">User's {{order.from}}<br>address</td>
-                  <td>
-                    <router-link :to="'/address/' + formatAddress(order.fromAddress, order.from)">
-                      {{formatAddress(order.fromAddress, order.from)}}
-                    </router-link>
-                    <small class="d-block text-muted" v-if="statsByAddresses[order.fromAddress] && statsByAddresses[order.fromAddress].count > 0">
-                      {{statsByAddresses[order.fromAddress].count}} {{formatPlural(statsByAddresses[order.fromAddress].count, 'order', 'orders')}} worth ${{formatAmount(statsByAddresses[order.fromAddress]['sum:fromAmountUsd'], 'USD')}}
-                    </small>
-                  </td>
-                </tr>
-                <tr v-if="order.toAddress">
-                  <td class="text-muted text-right small-12">User's {{order.to}}<br>address</td>
-                  <td>
-                    <router-link :to="'/address/' + formatAddress(order.toAddress, order.to)">
-                      {{formatAddress(order.toAddress, order.to)}}
-                    </router-link>
-                    <small class="d-block text-muted" v-if="order.fromAddress !== order.toAddress && statsByAddresses[order.toAddress] && statsByAddresses[order.toAddress].count > 0">
-                      {{statsByAddresses[order.toAddress].count}} {{formatPlural(statsByAddresses[order.toAddress].count, 'order', 'orders')}} worth ${{formatAmount(statsByAddresses[order.toAddress]['sum:fromAmountUsd'], 'USD')}}
-                    </small>
-                  </td>
-                </tr>
-                <tr v-if="order.fromCounterPartyAddress">
-                  <td class="text-muted text-right small-12">Agent's {{order.from}}<br>address</td>
-                  <td>
-                    <router-link :to="'/address/' + formatAddress(order.fromCounterPartyAddress, order.from)">
-                      {{formatAddress(order.fromCounterPartyAddress, order.from)}}
-                    </router-link>
-                  </td>
-                </tr>
-                <tr v-if="order.toCounterPartyAddress">
-                  <td class="text-muted text-right small-12">Agent's {{order.to}}<br>address</td>
-                  <td>
-                    <router-link :to="'/address/' + formatAddress(order.toCounterPartyAddress, order.to)">
-                      {{formatAddress(order.toCounterPartyAddress, order.to)}}
-                    </router-link>
-                  </td>
-                </tr>
-                <tr v-if="order.fromFundHash" :class="{
-                  'unconfirmed-tx': isPendingTx(order, 'fromFundHash')
-                }">
-                  <td class="text-muted text-right small-12">User's {{order.from}}<br>funding transaction</td>
-                  <td>
-                    <Tx :order="order" type="fromFundHash" />
-                  </td>
-                </tr>
-                <tr v-if="order.fromSecondaryFundHash" :class="{
-                  'unconfirmed-tx': isPendingTx(order, 'fromSecondaryFundHash')
-                }">
-                  <td class="text-muted text-right small-12">User's {{order.from}}<br>secondary funding transaction</td>
-                  <td>
-                    <Tx :order="order" type="fromSecondaryFundHash" />
-                  </td>
-                </tr>
-                <tr v-if="order.toClaimHash" :class="{
-                  'unconfirmed-tx': isPendingTx(order, 'toClaimHash')
-                }">
-                  <td class="text-muted text-right small-12">User's {{order.to}}<br>claim transaction</td>
-                  <td>
-                    <Tx :order="order" type="toClaimHash" />
-                  </td>
-                </tr>
-                <tr v-if="order.toFundHash" :class="{
-                  'unconfirmed-tx': isPendingTx(order, 'toFundHash')
-                }">
-                  <td class="text-muted text-right small-12">Agent's {{order.to}}<br>funding transaction</td>
-                  <td>
-                    <Tx :order="order" type="toFundHash" />
-                  </td>
-                </tr>
-                <tr v-if="order.toSecondaryFundHash" :class="{
-                  'unconfirmed-tx': isPendingTx(order, 'toSecondaryFundHash')
-                }">
-                  <td class="text-muted text-right small-12">Agent's {{order.to}} secondary<br> funding transaction</td>
-                  <td>
-                    <Tx :order="order" type="toSecondaryFundHash" />
-                  </td>
-                </tr>
-                <tr v-if="order.fromClaimHash" :class="{
-                  'unconfirmed-tx': isPendingTx(order, 'fromClaimHash')
-                }">
-                  <td class="text-muted text-right small-12">Agent's {{order.from}}<br>claim transaction</td>
-                  <td>
-                    <Tx :order="order" type="fromClaimHash" />
-                  </td>
-                </tr>
-                <tr v-if="order.toRefundHash" :class="{
-                  'unconfirmed-tx': isPendingTx(order, 'toRefundHash')
-                }">
-                  <td class="text-muted text-right small-12">Agent's {{order.to}}<br>refund transaction</td>
-                  <td>
-                    <Tx :order="order" type="toRefundHash" />
-                  </td>
-                </tr>
-                <tr>
-                  <td class="text-muted text-right small-12">Recovery Options</td>
-                  <td>
-                    <details v-if="order.userAgent === 'wallet'">
-                      <summary>Recovery Code</summary>
-                      <pre class="mt-3"><code class="p-0">chrome.storage.local.get(['liquality-wallet'], function(result) {
-    const missingOrder = {{JSON.stringify(recoveryCode, null, 4)}}
-    const data = result['liquality-wallet']
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <td class="text-muted text-right small-12">USD Difference</td>
+                <td>
+                  <span :class="{
+                    'text-danger': percProfit(order.fromAmountUsd, order.toAmountUsd) < 0,
+                    'text-success': percProfit(order.fromAmountUsd, order.toAmountUsd) >= 0
+                  }">${{formatAmount(order.fromAmountUsd - order.toAmountUsd, 'USD')}} ({{percProfit(order.fromAmountUsd, order.toAmountUsd)}}%)</span>
+                  <span class="text-muted mx-2">&rsaquo;</span>
+                  <span :class="{
+                    'text-danger': percProfit(latestfromAmountUsd, latesttoAmountUsd) < 0,
+                    'text-success': percProfit(latestfromAmountUsd, latesttoAmountUsd) >= 0
+                  }">${{formatAmount(latestfromAmountUsd - latesttoAmountUsd, 'USD')}} ({{percProfit(latestfromAmountUsd, latesttoAmountUsd)}}%)</span>
+                  <span class="text-muted mx-2">&rsaquo;</span>
+                  <span :class="{
+                    'text-danger': (latestfromAmountUsd - latesttoAmountUsd - (order.fromAmountUsd - order.toAmountUsd)) < 0,
+                    'text-success': (latestfromAmountUsd - latesttoAmountUsd - (order.fromAmountUsd - order.toAmountUsd)) >= 0
+                  }">
+                    ${{formatAmount(latestfromAmountUsd - latesttoAmountUsd - (order.fromAmountUsd - order.toAmountUsd), 'USD')}}
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <td class="text-muted text-right small-12">Total Tx Fees<br>Agent Paid</td>
+                <td>
+                  ${{formatAmount(agentFees, 'USD')}}
+                </td>
+              </tr>
+              <tr>
+                <td class="text-muted text-right small-12">Total Tx Fees<br>User Paid</td>
+                <td>
+                  ${{formatAmount(userFees, 'USD')}}
+                </td>
+              </tr>
+              <tr>
+                <td class="text-muted text-right small-12">Status</td>
+                <td>{{order.status}}</td>
+              </tr>
+              <tr v-if="order.secretHash">
+                <td class="text-muted text-right small-12">Secret Hash</td>
+                <td>{{formatTxHash(order.secretHash, 'ETH')}}</td>
+              </tr>
+              <tr v-if="order.fromAddress">
+                <td class="text-muted text-right small-12">User's {{order.from}}<br>address</td>
+                <td>
+                  <router-link :to="'/address/' + formatAddress(order.fromAddress, order.from)">
+                    {{formatAddress(order.fromAddress, order.from)}}
+                  </router-link>
+                  <small class="d-block text-muted" v-if="statsByAddresses[order.fromAddress] && statsByAddresses[order.fromAddress].count > 0">
+                    {{statsByAddresses[order.fromAddress].count}} {{formatPlural(statsByAddresses[order.fromAddress].count, 'order', 'orders')}} worth ${{formatAmount(statsByAddresses[order.fromAddress]['sum:fromAmountUsd'], 'USD')}}
+                  </small>
+                </td>
+              </tr>
+              <tr v-if="order.toAddress">
+                <td class="text-muted text-right small-12">User's {{order.to}}<br>address</td>
+                <td>
+                  <router-link :to="'/address/' + formatAddress(order.toAddress, order.to)">
+                    {{formatAddress(order.toAddress, order.to)}}
+                  </router-link>
+                  <small class="d-block text-muted" v-if="order.fromAddress !== order.toAddress && statsByAddresses[order.toAddress] && statsByAddresses[order.toAddress].count > 0">
+                    {{statsByAddresses[order.toAddress].count}} {{formatPlural(statsByAddresses[order.toAddress].count, 'order', 'orders')}} worth ${{formatAmount(statsByAddresses[order.toAddress]['sum:fromAmountUsd'], 'USD')}}
+                  </small>
+                </td>
+              </tr>
+              <tr v-if="order.fromCounterPartyAddress">
+                <td class="text-muted text-right small-12">Agent's {{order.from}}<br>address</td>
+                <td>
+                  <router-link :to="'/address/' + formatAddress(order.fromCounterPartyAddress, order.from)">
+                    {{formatAddress(order.fromCounterPartyAddress, order.from)}}
+                  </router-link>
+                </td>
+              </tr>
+              <tr v-if="order.toCounterPartyAddress">
+                <td class="text-muted text-right small-12">Agent's {{order.to}}<br>address</td>
+                <td>
+                  <router-link :to="'/address/' + formatAddress(order.toCounterPartyAddress, order.to)">
+                    {{formatAddress(order.toCounterPartyAddress, order.to)}}
+                  </router-link>
+                </td>
+              </tr>
+              <tr v-if="order.fromFundHash" :class="{
+                'unconfirmed-tx': isPendingTx(order, 'fromFundHash')
+              }">
+                <td class="text-muted text-right small-12">User's {{order.from}}<br>funding transaction</td>
+                <td>
+                  <Tx :order="order" type="fromFundHash" />
+                </td>
+              </tr>
+              <tr v-if="order.fromSecondaryFundHash" :class="{
+                'unconfirmed-tx': isPendingTx(order, 'fromSecondaryFundHash')
+              }">
+                <td class="text-muted text-right small-12">User's {{order.from}}<br>secondary funding transaction</td>
+                <td>
+                  <Tx :order="order" type="fromSecondaryFundHash" />
+                </td>
+              </tr>
+              <tr v-if="order.toClaimHash" :class="{
+                'unconfirmed-tx': isPendingTx(order, 'toClaimHash')
+              }">
+                <td class="text-muted text-right small-12">User's {{order.to}}<br>claim transaction</td>
+                <td>
+                  <Tx :order="order" type="toClaimHash" />
+                </td>
+              </tr>
+              <tr v-if="order.toFundHash" :class="{
+                'unconfirmed-tx': isPendingTx(order, 'toFundHash')
+              }">
+                <td class="text-muted text-right small-12">Agent's {{order.to}}<br>funding transaction</td>
+                <td>
+                  <Tx :order="order" type="toFundHash" />
+                </td>
+              </tr>
+              <tr v-if="order.toSecondaryFundHash" :class="{
+                'unconfirmed-tx': isPendingTx(order, 'toSecondaryFundHash')
+              }">
+                <td class="text-muted text-right small-12">Agent's {{order.to}} secondary<br> funding transaction</td>
+                <td>
+                  <Tx :order="order" type="toSecondaryFundHash" />
+                </td>
+              </tr>
+              <tr v-if="order.fromClaimHash" :class="{
+                'unconfirmed-tx': isPendingTx(order, 'fromClaimHash')
+              }">
+                <td class="text-muted text-right small-12">Agent's {{order.from}}<br>claim transaction</td>
+                <td>
+                  <Tx :order="order" type="fromClaimHash" />
+                </td>
+              </tr>
+              <tr v-if="order.toRefundHash" :class="{
+                'unconfirmed-tx': isPendingTx(order, 'toRefundHash')
+              }">
+                <td class="text-muted text-right small-12">Agent's {{order.to}}<br>refund transaction</td>
+                <td>
+                  <Tx :order="order" type="toRefundHash" />
+                </td>
+              </tr>
+              <tr>
+                <td class="text-muted text-right small-12">Recovery Options</td>
+                <td>
+                  <details v-if="order.userAgent === 'wallet'">
+                    <summary>Recovery Code</summary>
+                    <pre class="mt-3"><code class="p-0">chrome.storage.local.get(['liquality-wallet'], function(result) {
+  const missingOrder = {{JSON.stringify(recoveryCode, null, 4)}}
+  const data = result['liquality-wallet']
 
-    missingOrder.walletId = data.activeWalletId
+  missingOrder.walletId = data.activeWalletId
 
-    if(!data.history.mainnet) {
-      data.history.mainnet = {}
-      data.history.mainnet[data.activeWalletId] = []
-    }
+  if(!data.history.mainnet) {
+    data.history.mainnet = {}
+    data.history.mainnet[data.activeWalletId] = []
+  }
 
-    data.history.mainnet[data.activeWalletId] = data.history.mainnet[data.activeWalletId]
-      .filter(order => order.orderId !== missingOrder.orderId)
-    data.history.mainnet[data.activeWalletId].push(missingOrder)
+  data.history.mainnet[data.activeWalletId] = data.history.mainnet[data.activeWalletId]
+    .filter(order => order.orderId !== missingOrder.orderId)
+  data.history.mainnet[data.activeWalletId].push(missingOrder)
 
-    chrome.storage.local.set({ 'liquality-wallet': data }, function() {
-      chrome.runtime.reload()
-    })
-  })</code></pre>
-                    </details>
-                    <a v-else :href="recoveryLink" target="_blank" rel="noopener">Recovery Link</a>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+  chrome.storage.local.set({ 'liquality-wallet': data }, function() {
+    chrome.runtime.reload()
+  })
+})</code></pre>
+                  </details>
+                  <a v-else :href="recoveryLink" target="_blank" rel="noopener">Recovery Link</a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
-      <div class="col-md-4">
-        <div v-if="auditLogs && auditLogs.length > 0">
-          <h2 class="h5 mb-4">Timeline</h2>
-          <AuditLog :order="order" :auditLogs="auditLogs" :auditMap="auditMap" :rates="rates" />
-        </div>
-      </div>
+    </div>
+    <div class="col-md-4" v-if="auditLogs && auditLogs.length > 0">
+      <h2 class="h5 mb-4">Timeline</h2>
+      <AuditLog :order="order" :auditLogs="auditLogs" :auditMap="auditMap" :rates="rates" />
     </div>
   </div>
 </template>
@@ -280,6 +277,7 @@ import Tx from '@/components/Order/Tx.vue'
 import AuditLog from '@/components/Order/AuditLog.vue'
 import format from '@/mixins/format'
 import agent from '@/utils/agent'
+import LoadingTableBody from '../components/LoadingTableBody.vue'
 
 export default {
   metaInfo () {
@@ -289,7 +287,8 @@ export default {
   },
   components: {
     AuditLog,
-    Tx
+    Tx,
+    LoadingTableBody
   },
   mixins: [format],
   data () {
@@ -541,6 +540,12 @@ export default {
     width: 1%;
     white-space: nowrap;
     text-align: left;
+  }
+
+  .loading-table {
+    tr > td:first-child {
+      width: 20%;
+    }
   }
 }
 
