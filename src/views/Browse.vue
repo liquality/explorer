@@ -18,7 +18,7 @@
 </template>
 
 <script>
-import { debounce } from 'lodash-es'
+import debounce from 'lodash-es/debounce'
 
 import agent from '@/utils/agent'
 import Filters from '@/components/Filters.vue'

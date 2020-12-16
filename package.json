@@ -4,8 +4,11 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build --modern",
+    "build": "vue-cli-service build --modern --report",
     "lint": "vue-cli-service lint"
+  },
+  "engines": {
+    "node": "^14.15.1"
   },
   "dependencies": {
     "@liquality/cryptoassets": "^0.2.4",

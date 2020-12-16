@@ -37,6 +37,9 @@ const EXPLORER_MAP = {
 
 export default {
   methods: {
+    calculatePerc (a, b) {
+      return Math.ceil(((a - b) / b) * 10000) / 100
+    },
     isEqual (a, b) {
       return isEqual(parseISO(a), parseISO(b))
     },
