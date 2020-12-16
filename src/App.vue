@@ -34,7 +34,7 @@
 export default {
   metaInfo: {
     title: 'Home',
-    titleTemplate: '%s - Liquality Agent Dashboard'
+    titleTemplate: '%s - Liquality Explorer'
   },
   data () {
     return {
