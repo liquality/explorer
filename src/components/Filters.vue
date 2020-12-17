@@ -42,6 +42,10 @@
         'nav-link': true,
         active: status.includes('AGENT_REFUNDED')
       }" @click="setStatus('AGENT_REFUNDED')">Refunded</span>
+      <span :class="{
+        'nav-link': true,
+        active: status.includes('SWAP_EXPIRED')
+      }" @click="setStatus('SWAP_EXPIRED')">Swap Expired</span>
     </nav>
 
     <nav class="nav flex-column mb-3">
@@ -92,7 +96,8 @@ export default {
         'AGENT_CLAIMED',
         'AGENT_FUNDED',
         'AGENT_CLAIMED',
-        'AGENT_REFUNDED'
+        'AGENT_REFUNDED',
+        'SWAP_EXPIRED'
       ],
       userAgent: [
         'WALLET',
