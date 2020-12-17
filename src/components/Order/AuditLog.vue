@@ -18,6 +18,10 @@
         <User class="icon-user" />
         <p class="mb-0">Agent is waiting for {{audit.extra.minConf}} {{ audit.extra.minConf === 1 ? 'confirmation' : 'confirmations' }} on user's funding transaction</p>
       </div>
+      <div v-else-if="audit.context === 'FIND_REFUND_TX'">
+        <User />
+        <p class="mb-0">User has refunded the swap</p>
+      </div>
       <div v-else-if="audit.orderStatus === 'USER_FUNDED'">
         <Robot />
         <p class="mb-0">Agent has confirmed user's funding transaction</p>
