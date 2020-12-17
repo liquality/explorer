@@ -184,6 +184,14 @@
                   <Tx :order="order" type="toClaimHash" />
                 </td>
               </tr>
+              <tr v-if="order.fromRefundHash" :class="{
+                'unconfirmed-tx': isPendingTx(order, 'fromRefundHash')
+              }">
+                <td class="text-muted text-right small-12">User's {{order.to}}<br>refund transaction</td>
+                <td>
+                  <Tx :order="order" type="fromRefundHash" />
+                </td>
+              </tr>
               <tr v-if="order.toFundHash" :class="{
                 'unconfirmed-tx': isPendingTx(order, 'toFundHash')
               }">
