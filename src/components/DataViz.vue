@@ -34,7 +34,7 @@
       <div class="col-md-3 mb-3">
         <div class="card">
           <LoadingCardBody v-if="!summary || loading" />
-          <SummaryCard v-else heading="Number of Swaps" :summary="summary" type="count" />
+          <SummaryCard v-else heading="Number of Swaps" :summary="summary" type="count" :plain="true" />
         </div>
       </div>
       <div class="col-md-3 mb-3">

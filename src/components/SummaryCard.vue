@@ -9,7 +9,7 @@
     }">{{perc}}%</span>
   </h6>
   <p class="h3 font-weight-light mb-0">
-    ${{formatAmount(summary.current[type], 'USD')}}
+    <span v-if="!plain">$</span>{{formatAmount(summary.current[type], 'USD')}}
   </p>
 </div>
 </template>
@@ -24,7 +24,11 @@ export default {
   props: {
     heading: String,
     type: String,
-    summary: Object
+    summary: Object,
+    plain: {
+      type: Boolean,
+      default: false
+    }
   },
   computed: {
     perc () {
