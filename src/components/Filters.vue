@@ -44,6 +44,10 @@
       }" @click="setStatus('AGENT_REFUNDED')">Refunded</span>
       <span :class="{
         'nav-link': true,
+        active: status.includes('QUOTE_EXPIRED')
+      }" @click="setStatus('QUOTE_EXPIRED')">Quote Expired</span>
+      <span :class="{
+        'nav-link': true,
         active: status.includes('SWAP_EXPIRED')
       }" @click="setStatus('SWAP_EXPIRED')">Swap Expired</span>
     </nav>
@@ -97,6 +101,7 @@ export default {
         'AGENT_FUNDED',
         'AGENT_CLAIMED',
         'AGENT_REFUNDED',
+        'QUOTE_EXPIRED',
         'SWAP_EXPIRED'
       ],
       userAgent: [
