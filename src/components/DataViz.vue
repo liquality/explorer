@@ -64,7 +64,7 @@
       <div class="col-md-3 mb-3">
         <div class="card">
           <LoadingCardBody v-if="!summary || loading" />
-          <SummaryCard v-else heading="UI Value" :summary="summary" type="ui:sum:fromAmountUsd" />
+          <SummaryCard v-else heading="UI Volume" :summary="summary" type="ui:sum:fromAmountUsd" />
         </div>
       </div>
     </div>

@@ -31,7 +31,7 @@
       <LoadingTableBody :trCount="25" :tdCount="9" v-if="loading" />
       <tbody class="font-weight-normal" v-else>
         <tr v-for="item in list" :key="item.orderId" :class="{
-          'unconfirmed-tx': item.hasUnconfirmedTx
+          'unconfirmed-tx': item.hasUnconfirmedTx || !['SWAP_EXPIRED', 'QUOTE_EXPIRED', 'AGENT_REFUNDED', 'AGENT_CLAIMED'].includes(item.status)
         }">
           <td>
             <router-link :to="'/order/' + item.orderId" class="text-muted">
