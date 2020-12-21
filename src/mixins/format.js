@@ -7,6 +7,7 @@ const coinFormatter = new Intl.NumberFormat('en-US')
 
 const DP_PRETTY_MAP = {
   BTC: 6,
+  RBTC: 6,
   ETH: 6,
   DAI: 6,
   USDC: 6,
