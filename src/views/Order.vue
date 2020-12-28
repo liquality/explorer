@@ -309,12 +309,12 @@ export default {
       const { order } = this
 
       const urlParams = {
-        ccy1: order.from.toLowerCase(),
+        ccy1: order.from,
         ccy1v: this.formatUnitToCurrency(order.fromAmount, order.from).toNumber(),
         ccy1Addr: order.fromAddress,
         ccy1CounterPartyAddr: order.fromCounterPartyAddress,
 
-        ccy2: order.to.toLowerCase(),
+        ccy2: order.to,
         ccy2v: this.formatUnitToCurrency(order.toAmount, order.to).toNumber(),
         ccy2Addr: order.toAddress,
         ccy2CounterPartyAddr: order.toCounterPartyAddress,
