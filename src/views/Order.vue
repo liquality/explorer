@@ -149,7 +149,7 @@
               <tr v-if="order.fromCounterPartyAddress">
                 <td class="text-muted text-right small-12">Agent's {{order.from}}<br>address</td>
                 <td>
-                  <a :href="formatAddressLink(order.fromAddress, order.from)" target="_blank" rel="noopener">{{formatAddress(order.fromAddress, order.from)}}</a>
+                  <a :href="formatAddressLink(order.fromCounterPartyAddress, order.from)" target="_blank" rel="noopener">{{formatAddress(order.fromAddress, order.from)}}</a>
                 </td>
               </tr>
               <tr v-if="order.toCounterPartyAddress">
