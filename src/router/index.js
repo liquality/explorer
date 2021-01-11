@@ -33,6 +33,11 @@ const routes = [
     path: '/topAddresses',
     name: 'TopAddresses',
     component: () => import('../views/TopAddresses.vue')
+  },
+  {
+    path: '/login',
+    name: 'Login',
+    component: () => import('../views/Login.vue')
   }
 ]
 

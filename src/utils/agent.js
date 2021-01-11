@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const instance = axios.create({
-  baseURL: process.env.VUE_APP_AGENT_URL
+  baseURL: '/agent'
 })
 
 export default instance

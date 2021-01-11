@@ -17,8 +17,13 @@
                 Top Addresses
               </router-link>
             </li>
+            <li class="nav-item" v-if="user">
+              <a class="nav-link cursor-pointer" @click="logout">
+                Logout
+              </a>
+            </li>
           </ul>
-          <form @submit="submit" class="ml-3 my-2 my-lg-0 d-inline w-100">
+          <form @submit.prevent="submit" class="ml-3 my-2 my-lg-0 d-inline w-100">
             <input type="text" class="form-control mr-sm-2" placeholder="Search for address, transaction, secret hash, or order ID" v-model="query" required>
           </form>
         </div>
@@ -31,6 +36,8 @@
 </template>
 
 <script>
+import { mapState, mapActions } from 'vuex'
+
 export default {
   metaInfo: {
     title: 'Home',
@@ -42,13 +49,16 @@ export default {
     }
   },
   created () {
+    this.checkUser()
+
     if (this.$route.query.q) {
       this.query = this.$route.query.q
     }
   },
+  computed: mapState(['user']),
   methods: {
+    ...mapActions(['logout', 'checkUser']),
     submit (e) {
-      e.preventDefault()
       if (this.$route.query.q === this.query) return
       if (!this.query) return
 

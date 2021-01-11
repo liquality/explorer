@@ -22,6 +22,18 @@
         <User />
         <p class="mb-0">User has refunded the swap</p>
       </div>
+      <div v-else-if="audit.context === 'AUTH' && audit.status === 'APPROVED'">
+        <Approve />
+        <p class="mb-0">
+          Agent has approved the order
+          <em v-if="audit.extra.message" class="ml-2 small text-muted">({{audit.extra.message}})</em>
+        </p>
+      </div>
+      <div v-else-if="audit.context === 'AUTH' && audit.status === 'REJECTED'">
+        <Reject />
+        <p class="mb-0">Agent has rejected the order</p>
+        <em v-if="audit.extra.message" class="ml-2 small text-muted">({{audit.extra.message}})</em>
+      </div>
       <div v-else-if="audit.orderStatus === 'USER_FUNDED'">
         <Robot />
         <p class="mb-0">Agent has confirmed user's funding transaction</p>
@@ -78,12 +90,16 @@
 import format from '@/mixins/format'
 import User from '@/components/Icons/User.vue'
 import Robot from '@/components/Icons/Robot.vue'
+import Approve from '@/components/Icons/Approve.vue'
+import Reject from '@/components/Icons/Reject.vue'
 
 export default {
   mixins: [format],
   components: {
     User,
-    Robot
+    Robot,
+    Approve,
+    Reject
   },
   props: {
     auditLogs: Array,

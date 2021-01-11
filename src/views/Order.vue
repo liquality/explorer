@@ -5,6 +5,21 @@
       <p class="lead font-weight-light text-muted">
         {{orderId}}
       </p>
+      <div class="card mb-3" v-if="user">
+        <div class="card-body">
+          <form @submit.prevent="update" class="form-inline justify-content-center">
+            <select class="form-control mr-2" v-model="action" :disabled="loading">
+              <option value="approve">Approve</option>
+              <option value="reject">Reject</option>
+            </select>
+            <select class="form-control mr-2" v-model="type" :disabled="loading">
+              <option value="reciprocate-init-swap">Reciprocate Swap</option>
+            </select>
+            <input type="text" class="form-control mr-2" placeholder="Message" v-model="message" required :disabled="loading">
+            <button type="submit" class="btn btn-primary" :disabled="loading">Update</button>
+          </form>
+        </div>
+      </div>
       <div class="card border-top-0 mb-5">
         <div class="table-responsive">
           <table class="table bg-white m-0 table-order-details">
@@ -267,6 +282,7 @@
 </template>
 
 <script>
+import { mapState, mapActions } from 'vuex'
 import qs from 'qs'
 import { min, max } from 'date-fns'
 
@@ -300,10 +316,17 @@ export default {
       changeIntoAmountUsd: null,
       rates: null,
       latestMarketRate: null,
-      changeInMarketRate: null
+      changeInMarketRate: null,
+
+      check: null,
+      action: 'reject',
+      type: null,
+      message: null,
+      loading: false
     }
   },
   computed: {
+    ...mapState(['user']),
     orderId () {
       return this.$route.params.orderId
     },
@@ -374,6 +397,19 @@ export default {
     }
   },
   methods: {
+    ...mapActions(['checkOrder', 'updateOrder']),
+    async update () {
+      this.loading = true
+
+      await this.updateOrder({
+        orderId: this.order.orderId,
+        type: this.type,
+        message: this.message,
+        action: this.action
+      })
+
+      this.loading = false
+    },
     isPendingTx (order, type) {
       const hash = order[type]
 
@@ -394,6 +430,8 @@ export default {
         verbose: true
       }
     })
+
+    this.check = await this.checkOrder({ orderId: this.orderId })
 
     const auditMap = {}
     const timestampSet = new Set()

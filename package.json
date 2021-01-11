@@ -5,7 +5,8 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build --modern --report",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "setup-netlify": "sed \"s|<AGENT_URL>|$VUE_APP_AGENT_URL|\" ./netlify.example.toml > netlify.toml"
   },
   "engines": {
     "node": "^14.15.1"
