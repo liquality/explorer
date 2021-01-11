@@ -5,7 +5,7 @@
       <p class="lead font-weight-light text-muted">
         {{orderId}}
       </p>
-      <div class="card mb-3" v-if="user">
+      <div class="card mb-3" v-if="user && noFlags">
         <div class="card-body">
           <form @submit.prevent="update" class="form-inline justify-content-center">
             <select class="form-control mr-2" v-model="action" :disabled="loading">
@@ -327,6 +327,10 @@ export default {
   },
   computed: {
     ...mapState(['user']),
+    noFlags () {
+      const check = (this.check || {}).flags || {}
+      return Object.keys(check).length === 0
+    },
     orderId () {
       return this.$route.params.orderId
     },
@@ -408,6 +412,8 @@ export default {
         action: this.action
       })
 
+      this.check = await this.checkOrder({ orderId: this.orderId })
+
       this.loading = false
     },
     isPendingTx (order, type) {
@@ -431,7 +437,9 @@ export default {
       }
     })
 
-    this.check = await this.checkOrder({ orderId: this.orderId })
+    if (this.user) {
+      this.check = await this.checkOrder({ orderId: this.orderId })
+    }
 
     const auditMap = {}
     const timestampSet = new Set()
