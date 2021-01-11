@@ -5,7 +5,7 @@
       <p class="lead font-weight-light text-muted">
         {{orderId}}
       </p>
-      <div class="card mb-3" v-if="user && noFlags">
+      <div class="card mb-3" v-if="user && showTable && noFlags">
         <div class="card-body">
           <form @submit.prevent="update" class="form-inline justify-content-center">
             <select class="form-control mr-2" v-model="action" :disabled="loading">
@@ -327,6 +327,10 @@ export default {
   },
   computed: {
     ...mapState(['user']),
+    showTable () {
+      if (!this.order) return false
+      return !['SWAP_EXPIRED', 'QUOTE_EXPIRED', 'AGENT_REFUNDED', 'AGENT_CLAIMED', 'USER_CLAIMED', 'AGENT_FUNDED'].includes(this.order.status)
+    },
     noFlags () {
       const check = (this.check || {}).flags || {}
       return Object.keys(check).length === 0
