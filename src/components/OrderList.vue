@@ -87,6 +87,9 @@
                     Rejected
                   </span>
                 </span>
+                <span v-else-if="['SWAP_EXPIRED', 'QUOTE_EXPIRED', 'AGENT_REFUNDED', 'AGENT_CLAIMED', 'USER_CLAIMED', 'AGENT_FUNDED'].includes(item.status)">
+                  -
+                </span>
                 <span v-else>
                   Pending
                 </span>
