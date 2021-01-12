@@ -30,6 +30,29 @@
                 <td>{{order.userAgent || 'UI'}}</td>
               </tr>
               <tr>
+                <td class="text-muted text-right small-12">
+                  <span v-if="isFuture(new Date(order.expiresAt))">Expires</span>
+                  <span v-else>Expired</span>
+                </td>
+                <td>{{formatDurationStrict(new Date(order.expiresAt))}}</td>
+              </tr>
+              <tr>
+                <td class="text-muted text-right small-12">
+                  Swap
+                  <span v-if="isFuture(new Date(order.swapExpiration * 1000))">Expires</span>
+                  <span v-else>Expired</span>
+                </td>
+                <td>{{formatDurationStrict(new Date(order.swapExpiration * 1000))}}</td>
+              </tr>
+              <tr>
+                <td class="text-muted text-right small-12">
+                  Node Swap
+                  <span v-if="isFuture(new Date(order.nodeSwapExpiration * 1000))">Expires</span>
+                  <span v-else>Expired</span>
+                </td>
+                <td>{{formatDurationStrict(new Date(order.nodeSwapExpiration * 1000))}}</td>
+              </tr>
+              <tr>
                 <td class="text-muted text-right small-12">Amount</td>
                 <td>
                   {{formatAmount(order.fromAmount, order.from, true)}} {{order.from}}

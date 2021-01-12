@@ -1,4 +1,4 @@
-import { formatDistance, formatDistanceStrict, format, isEqual, parseISO as parseISOMain } from 'date-fns'
+import { isFuture, formatDistance, formatDistanceStrict, format, isEqual, parseISO as parseISOMain } from 'date-fns'
 import cryptoassets from '@liquality/cryptoassets'
 import BN from 'bignumber.js'
 
@@ -91,6 +91,7 @@ export default {
         addSuffix: suffix
       })
     },
+    isFuture,
     formatDate (value) {
       return format(parseISO(value), 'd MMM yyyy p')
     },
