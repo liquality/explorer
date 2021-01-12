@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build --modern --report",
+    "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
     "setup-netlify": "sed \"s|<AGENT_URL>|$VUE_APP_AGENT_URL|\" ./netlify.example.toml > netlify.toml"
   },

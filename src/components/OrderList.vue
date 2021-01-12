@@ -148,8 +148,11 @@ export default {
   computed: mapState(['user']),
   created () {
     if (this.user) {
+      console.log('this.user', this.user)
       this.list.map(async ({ orderId }) => {
-        const check = await this.checkOrder({ orderId: this.orderId })
+        console.log('getting', orderId)
+        const check = await this.checkOrder({ orderId })
+        console.log('check', check)
         if (check && check.flags) {
           this.orderCheckMap[orderId] = check.flags
         }
