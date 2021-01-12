@@ -45,7 +45,8 @@ export default {
   },
   data () {
     return {
-      query: null
+      query: null,
+      loading: true
     }
   },
   async created () {
