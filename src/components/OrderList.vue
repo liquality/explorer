@@ -77,16 +77,19 @@
           </td>
           <td v-if="user">
             <router-link :to="'/order/' + item.orderId">
-              <span v-if="orderCheckMap[item.orderId] && orderCheckMap[item.orderId]['reciprocate-init-swap']">
-                <span class="text-success" v-if="orderCheckMap[item.orderId]['reciprocate-init-swap'].approve">
-                  Approved
-                </span>
-                <span class="text-danger" v-else-if="orderCheckMap[item.orderId]['reciprocate-init-swap'].reject">
-                  Rejected
-                </span>
-              </span>
+              <span v-if="!orderCheckMap">...</span>
               <span v-else>
-                Pending
+                <span v-if="orderCheckMap[item.orderId] && orderCheckMap[item.orderId]['reciprocate-init-swap']">
+                  <span class="text-success" v-if="orderCheckMap[item.orderId]['reciprocate-init-swap'].approve">
+                    Approved
+                  </span>
+                  <span class="text-danger" v-else-if="orderCheckMap[item.orderId]['reciprocate-init-swap'].reject">
+                    Rejected
+                  </span>
+                </span>
+                <span v-else>
+                  Pending
+                </span>
               </span>
             </router-link>
           </td>
@@ -112,7 +115,7 @@ export default {
   data () {
     return {
       sort: '-createdAt',
-      orderCheckMap: {}
+      orderCheckMap: false
     }
   },
   mixins: [format],
@@ -151,10 +154,7 @@ export default {
       const orderCheckMap = {}
 
       await Promise.all(this.list.map(async ({ orderId }) => {
-        console.log('getting', orderId)
         const check = await this.checkOrder({ orderId })
-
-        console.log(orderId, check && check.flags)
 
         if (check && check.flags) {
           orderCheckMap[orderId] = check.flags
