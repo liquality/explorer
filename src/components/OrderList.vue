@@ -25,6 +25,7 @@
           </td>
           <td scope="col" colspan="3" class="text-muted">Swap</td>
           <td scope="col" colspan="3" class="text-muted">Rate</td>
+          <td scope="col" class="text-muted" v-if="user">Approve/Reject</td>
           <td scope="col" class="text-muted">Status</td>
         </tr>
       </thead>
@@ -74,6 +75,21 @@
               {{formatAssetValue(item.rate, item.to)}} {{item.to}}
             </router-link>
           </td>
+          <td v-if="user">
+            <router-link :to="'/order/' + item.orderId">
+              <span v-if="orderCheckMap[item.orderId] && orderCheckMap[item.orderId]['reciprocate-init-swap']">
+                <span class="text-success" v-if="orderCheckMap[item.orderId]['reciprocate-init-swap'].approve">
+                  Approved
+                </span>
+                <span class="text-danger" v-else-if="orderCheckMap[item.orderId]['reciprocate-init-swap'].reject">
+                  Rejected
+                </span>
+              </span>
+              <span v-else>
+                Pending
+              </span>
+            </router-link>
+          </td>
           <td>
             <router-link :to="'/order/' + item.orderId">
               {{item.status}}<br>
@@ -87,6 +103,7 @@
 </template>
 
 <script>
+import { mapState, mapActions } from 'vuex'
 import format from '@/mixins/format'
 import LoadingTableBody from './LoadingTableBody.vue'
 
@@ -94,7 +111,8 @@ export default {
   components: { LoadingTableBody },
   data () {
     return {
-      sort: '-createdAt'
+      sort: '-createdAt',
+      orderCheckMap: {}
     }
   },
   mixins: [format],
@@ -110,6 +128,7 @@ export default {
     }
   },
   methods: {
+    ...mapActions(['checkOrder']),
     percProfit (from, to) {
       return Math.ceil(((from - to) / from) * 10000) / 100
     },
@@ -124,6 +143,17 @@ export default {
   watch: {
     sort (sort) {
       this.$emit('sort', sort)
+    }
+  },
+  computed: mapState(['user']),
+  created () {
+    if (this.user) {
+      this.list.map(async ({ orderId }) => {
+        const check = await this.checkOrder({ orderId: this.orderId })
+        if (check && check.flags) {
+          this.orderCheckMap[orderId] = check.flags
+        }
+      })
     }
   }
 }

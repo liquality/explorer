@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="user">
     <h1 class="h4 mb-4 text-center">KillSwitch&trade;</h1>
     <div class="row">
       <div class="col-md-4 mx-auto text-center" v-if="success === null">
@@ -38,11 +38,6 @@ export default {
     ...mapState(['user']),
     query () {
       return this.$route.query.q
-    }
-  },
-  created () {
-    if (!this.user) {
-      // this.goHome()
     }
   },
   methods: {
