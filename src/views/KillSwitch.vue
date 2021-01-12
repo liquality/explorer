@@ -42,7 +42,7 @@ export default {
   },
   created () {
     if (!this.user) {
-      this.goHome()
+      // this.goHome()
     }
   },
   methods: {
