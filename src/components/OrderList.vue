@@ -146,7 +146,7 @@ export default {
     }
   },
   computed: mapState(['user']),
-  created () {
+  beforeUpdate () {
     if (this.user) {
       console.log('this.user', this.user, this.list)
       this.list.map(async ({ orderId }) => {
