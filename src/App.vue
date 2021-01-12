@@ -30,7 +30,7 @@
       </div>
     </nav>
     <div class="container py-5">
-      <router-view/>
+      <router-view v-if="!loading" />
     </div>
   </div>
 </template>
@@ -48,12 +48,16 @@ export default {
       query: null
     }
   },
-  created () {
-    this.checkUser()
-
+  async created () {
     if (this.$route.query.q) {
       this.query = this.$route.query.q
     }
+
+    this.loading = true
+
+    await this.checkUser()
+
+    this.loading = false
   },
   computed: mapState(['user']),
   methods: {
