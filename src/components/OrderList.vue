@@ -146,17 +146,22 @@ export default {
     }
   },
   computed: mapState(['user']),
-  beforeUpdate () {
+  async beforeUpdate () {
     if (this.user) {
-      console.log('this.user', this.user, this.list)
-      this.list.map(async ({ orderId }) => {
+      const orderCheckMap = {}
+
+      await Promise.all(this.list.map(async ({ orderId }) => {
         console.log('getting', orderId)
         const check = await this.checkOrder({ orderId })
-        console.log('check', check)
+
+        console.log(orderId, check && check.flags)
+
         if (check && check.flags) {
-          this.orderCheckMap[orderId] = check.flags
+          orderCheckMap[orderId] = check.flags
         }
-      })
+      }))
+
+      this.orderCheckMap = orderCheckMap
     }
   }
 }
