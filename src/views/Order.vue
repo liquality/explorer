@@ -27,7 +27,7 @@
             <tbody class="font-weight-normal" v-else>
               <tr>
                 <td class="text-muted text-right small-12">User Agent</td>
-                <td>{{order.userAgent === 'wallet' ? 'Wallet' : 'UI'}}</td>
+                <td>{{order.userAgent || 'UI'}}</td>
               </tr>
               <tr>
                 <td class="text-muted text-right small-12">Amount</td>
