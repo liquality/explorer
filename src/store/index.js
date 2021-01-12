@@ -85,6 +85,19 @@ export default new Vuex.Store({
       commit('UNSET_USER')
       return false
     },
+    async killswitch ({ commit }) {
+      try {
+        const { data } = await agent.post('/api/user/killswitch')
+
+        if (data && data.success) {
+          return true
+        }
+      } catch (e) {
+        console.error(e)
+      }
+
+      return false
+    },
     async logout ({ commit }) {
       try {
         const { data } = await agent.post('/api/user/logout')

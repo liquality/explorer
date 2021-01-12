@@ -38,6 +38,11 @@ const routes = [
     path: '/login',
     name: 'Login',
     component: () => import('../views/Login.vue')
+  },
+  {
+    path: '/killswitch',
+    name: 'KillSwitch',
+    component: () => import('../views/KillSwitch.vue')
   }
 ]
 
