@@ -31,6 +31,7 @@
               </tr>
               <tr>
                 <td class="text-muted text-right small-12">
+                  Quote
                   <span v-if="isFuture(new Date(order.expiresAt))">Expires</span>
                   <span v-else>Expired</span>
                 </td>
