@@ -3,6 +3,7 @@
     <table class="table border bg-white mb-0">
       <thead>
         <tr>
+          <td scope="col" class="text-muted">UA</td>
           <td scope="col" :class="{
             'text-muted': true,
             'cursor-pointer': !noSort
@@ -24,7 +25,6 @@
             </span>
           </td>
           <td scope="col" colspan="3" class="text-muted">Swap</td>
-          <td scope="col" colspan="3" class="text-muted">Rate</td>
           <td scope="col" class="text-muted" v-if="user">Approve/Reject</td>
           <td scope="col" class="text-muted">Status</td>
         </tr>
@@ -32,12 +32,17 @@
       <LoadingTableBody :trCount="25" :tdCount="user ? 10 : 9" v-if="loading" />
       <tbody class="font-weight-normal" v-else>
         <tr v-for="item in list" :key="item.orderId" :class="{
-          'unconfirmed-tx': item.hasUnconfirmedTx || !['SWAP_EXPIRED', 'QUOTE_EXPIRED', 'AGENT_REFUNDED', 'AGENT_CLAIMED'].includes(item.status)
+          'unconfirmed-tx': !['SWAP_EXPIRED', 'QUOTE_EXPIRED', 'AGENT_REFUNDED', 'AGENT_CLAIMED'].includes(item.status)
         }">
           <td>
-            <router-link :to="'/order/' + item.orderId" class="text-muted">
+            <router-link :to="'/order/' + item.orderId">
+              {{item.userAgent.split(' ')[0]}}
+            </router-link>
+          </td>
+          <td>
+            <router-link :to="'/order/' + item.orderId">
               {{formatDuration(item.createdAt)}}<br>
-              <small>{{formatDate(item.createdAt)}}</small>
+              <small class="text-muted">{{formatDate(item.createdAt)}}</small>
             </router-link>
           </td>
           <td>
@@ -52,6 +57,8 @@
           <td class="text-right">
             <router-link :to="'/order/' + item.orderId">
               {{formatAmount(item.fromAmount, item.from, true)}} {{item.from}}
+              <br>
+              <small class="text-muted">1 {{item.from}}</small>
             </router-link>
           </td>
           <td class="px-0 font-weight-bold">
@@ -60,19 +67,8 @@
           <td class="text-left">
             <router-link :to="'/order/' + item.orderId">
               {{formatAmount(item.toAmount, item.to, true)}} {{item.to}}
-            </router-link>
-          </td>
-          <td class="text-right">
-            <router-link :to="'/order/' + item.orderId">
-              1 {{item.from}}
-            </router-link>
-          </td>
-          <td class="px-0 font-weight-bold">
-            =
-          </td>
-          <td class="text-left">
-            <router-link :to="'/order/' + item.orderId">
-              {{formatAssetValue(item.rate, item.to)}} {{item.to}}
+              <br>
+              <small class="text-muted">{{formatAssetValue(item.rate, item.to)}} {{item.to}}</small>
             </router-link>
           </td>
           <td v-if="user">
@@ -98,8 +94,11 @@
           </td>
           <td>
             <router-link :to="'/order/' + item.orderId">
-              {{item.status}}<br>
-              <small class="text-muted">{{formatDurationStrict(item.createdAt, item.updatedAt, false)}}</small>
+              {{item.status.replace('_', '\n')}}<br>
+              <small class="text-muted">
+                {{item.hasUnconfirmedTx ? 'has unconfirmed txs -' : ''}}
+                took {{formatDurationStrict(item.createdAt, item.updatedAt, false)}}
+              </small>
             </router-link>
           </td>
         </tr>
