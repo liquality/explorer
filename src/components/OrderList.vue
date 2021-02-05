@@ -47,7 +47,7 @@
           </td>
           <td>
             <router-link :to="'/order/' + item.orderId">
-              ${{formatAmount(item.fromAmountUsd, 'USD')}}
+              ${{formatAmount(item.fromAmountUsd, 'USD')}}<br>
               <small :class="{
                 'text-danger': percProfit(item.fromAmountUsd, item.toAmountUsd) < 0,
                 'text-success': percProfit(item.fromAmountUsd, item.toAmountUsd) >= 0
