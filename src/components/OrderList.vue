@@ -41,8 +41,8 @@
           </td>
           <td>
             <router-link :to="'/order/' + item.orderId">
-              {{formatDuration(item.createdAt)}}<br>
-              <small class="text-muted">{{formatDate(item.createdAt)}}</small>
+              {{formatDate(item.createdAt)}}<br>
+              <small class="text-muted">{{formatDuration(item.createdAt)}}</small>
             </router-link>
           </td>
           <td>
