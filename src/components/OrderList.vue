@@ -29,14 +29,14 @@
           <td scope="col" class="text-muted">Status</td>
         </tr>
       </thead>
-      <LoadingTableBody :trCount="25" :tdCount="user ? 10 : 9" v-if="loading" />
+      <LoadingTableBody :trCount="25" :tdCount="user ? 8 : 7" v-if="loading" />
       <tbody class="font-weight-normal" v-else>
         <tr v-for="item in list" :key="item.orderId" :class="{
           'unconfirmed-tx': !['SWAP_EXPIRED', 'QUOTE_EXPIRED', 'AGENT_REFUNDED', 'AGENT_CLAIMED'].includes(item.status)
         }">
           <td>
             <router-link :to="'/order/' + item.orderId">
-              {{item.userAgent.split(' ')[0]}}
+              {{item.userAgent ? item.userAgent.split(' ')[0] : '-'}}
             </router-link>
           </td>
           <td>
