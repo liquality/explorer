@@ -1,6 +1,9 @@
 <template>
   <div>
-    <h1 class="h4 mb-4">Browse</h1>
+    <h1 class="h4 mb-4">
+      Browse
+      <span v-if="backgroundLoading">...</span>
+    </h1>
     <div class="row">
       <div class="col-md-2">
         <Filters @update="filters = $event" />
@@ -42,7 +45,8 @@ export default {
       page: 1,
       sort: '-createdAt',
       filters: {},
-      loading: true
+      loading: true,
+      backgroundLoading: false
     }
   },
   computed: {
@@ -51,9 +55,14 @@ export default {
     }
   },
   methods: {
-    safeBrowse: debounce(function () { this.browse() }, 500),
-    async browse () {
-      this.loading = true
+    safeBrowse: debounce(function (fromTimeout) { this.browse(fromTimeout) }, 500),
+    async browse (fromTimeout) {
+      if (fromTimeout === true) {
+        this.backgroundLoading = true
+      } else {
+        clearTimeout(this.fetchTimeout)
+        this.loading = true
+      }
 
       const { data } = await agent.get('/api/dash/orders', {
         params: {
@@ -66,7 +75,11 @@ export default {
 
       this.loading = false
 
+      this.backgroundLoading = false
+
       this.swaps = data.result
+
+      this.fetchTimeout = setTimeout(this.safeBrowse, 2500, true)
     }
   },
   watch: {

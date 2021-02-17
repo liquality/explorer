@@ -1,7 +1,10 @@
 <template>
   <div class="row">
     <div class="col-md-8">
-      <h1 class="h4 mb-1">Order</h1>
+      <h1 class="h4 mb-1">
+        Order
+        <span v-if="backgroundLoading">...</span>
+      </h1>
       <p class="lead font-weight-light text-muted">
         {{orderId}}
       </p>
@@ -346,8 +349,12 @@ export default {
       action: 'reject',
       type: null,
       message: null,
-      loading: false
+      loading: false,
+      backgroundLoading: false
     }
+  },
+  created () {
+    this.fetchOrderPeriodically()
   },
   computed: {
     ...mapState(['user']),
@@ -456,98 +463,109 @@ export default {
     },
     percProfit (from, to) {
       return Math.ceil(((from - to) / from) * 10000) / 100
-    }
-  },
-  async created () {
-    const { data } = await agent.get(`/api/swap/order/${this.orderId}`, {
-      params: {
-        verbose: true
+    },
+    async fetchOrderPeriodically (periodic) {
+      if (periodic) {
+        this.backgroundLoading = true
       }
-    })
 
-    if (this.user) {
-      this.check = await this.checkOrder({ orderId: this.orderId })
-    }
+      await this.fetchOrder()
 
-    const auditMap = {}
-    const timestampSet = new Set()
+      this.backgroundLoading = false
 
-    const auditLogs = data.audit_log.map(audit => {
-      const key = `${audit.context}-${audit.orderStatus}-${audit.status}`
-      audit.key = key
-
-      if (!auditMap[key]) {
-        auditMap[key] = {
-          count: 0,
-          start: null,
-          end: null
+      this.fetchTimeout = setTimeout(this.fetchOrderPeriodically, 2500, true)
+    },
+    async fetchOrder () {
+      const { data } = await agent.get(`/api/swap/order/${this.orderId}`, {
+        params: {
+          verbose: true
         }
-      }
-
-      if (!auditMap[key].count) {
-        auditMap[key].start = new Date(audit.createdAt)
-        auditMap[key].end = new Date(audit.createdAt)
-      } else {
-        auditMap[key].start = min([auditMap[key].start, new Date(audit.createdAt)])
-        auditMap[key].end = max([auditMap[key].end, new Date(audit.createdAt)])
-      }
-
-      timestampSet.add(auditMap[key].start.getTime())
-      timestampSet.add(auditMap[key].end.getTime())
-
-      auditMap[key].count++
-
-      return audit
-    })
-
-    this.auditLogs = auditLogs.filter(audit => this.isEqual(this.parseISO(auditMap[audit.key].start), new Date(audit.createdAt)))
-    this.auditMap = auditMap
-    this.order = data
-
-    const addresses = new Set([data.toAddress, data.fromAddress].filter(a => !!a))
-
-    const statsByAddresses = await Promise.all([...addresses].map(
-      address => agent.get('/api/dash/statsByAddress', { params: { address } }).then(response => response.data)
-    ))
-
-    this.statsByAddresses = statsByAddresses.reduce((acc, obj) => {
-      acc[obj.address] = obj.result
-      return acc
-    }, {})
-
-    const latestTimeStamp = auditLogs.length > 0
-      ? Object.entries(auditMap).sort((a, b) => b[1].end - a[1].end)[0][1].end
-      : (data.updatedAt || data.createdAt)
-
-    if (latestTimeStamp) {
-      const timestamp = new Date(latestTimeStamp).getTime()
-
-      const markets = [`${data.from}-USD`, `${data.to}-USD`, `${data.from}-${data.to}`].map(market => {
-        return agent.get('/api/dash/rate', { params: { market, timestamp } })
-          .then(response => response.data.result)
       })
 
-      const [fromUsdRate, toUsdRate, marketRate] = await Promise.all(markets)
+      if (this.user) {
+        this.check = await this.checkOrder({ orderId: this.orderId })
+      }
 
-      this.latestfromAmountUsd = this.formatUnitToCurrency(data.fromAmount, data.from) * fromUsdRate
-      this.changeInfromAmountUsd = Math.ceil(((this.latestfromAmountUsd - data.fromAmountUsd) / data.fromAmountUsd) * 10000) / 100
+      const auditMap = {}
+      const timestampSet = new Set()
 
-      this.latesttoAmountUsd = this.formatUnitToCurrency(data.toAmount, data.to) * toUsdRate
-      this.changeIntoAmountUsd = Math.ceil(((this.latesttoAmountUsd - data.toAmountUsd) / data.toAmountUsd) * 10000) / 100
+      const auditLogs = data.audit_log.map(audit => {
+        const key = `${audit.context}-${audit.orderStatus}-${audit.status}`
+        audit.key = key
 
-      this.latestMarketRate = marketRate
-      this.changeInMarketRate = Math.ceil(((marketRate - data.rate) / data.rate) * 10000) / 100
+        if (!auditMap[key]) {
+          auditMap[key] = {
+            count: 0,
+            start: null,
+            end: null
+          }
+        }
+
+        if (!auditMap[key].count) {
+          auditMap[key].start = new Date(audit.createdAt)
+          auditMap[key].end = new Date(audit.createdAt)
+        } else {
+          auditMap[key].start = min([auditMap[key].start, new Date(audit.createdAt)])
+          auditMap[key].end = max([auditMap[key].end, new Date(audit.createdAt)])
+        }
+
+        timestampSet.add(auditMap[key].start.getTime())
+        timestampSet.add(auditMap[key].end.getTime())
+
+        auditMap[key].count++
+
+        return audit
+      })
+
+      this.auditLogs = auditLogs.filter(audit => this.isEqual(this.parseISO(auditMap[audit.key].start), new Date(audit.createdAt)))
+      this.auditMap = auditMap
+      this.order = data
+
+      const addresses = new Set([data.toAddress, data.fromAddress].filter(a => !!a))
+
+      const statsByAddresses = await Promise.all([...addresses].map(
+        address => agent.get('/api/dash/statsByAddress', { params: { address } }).then(response => response.data)
+      ))
+
+      this.statsByAddresses = statsByAddresses.reduce((acc, obj) => {
+        acc[obj.address] = obj.result
+        return acc
+      }, {})
+
+      const latestTimeStamp = auditLogs.length > 0
+        ? Object.entries(auditMap).sort((a, b) => b[1].end - a[1].end)[0][1].end
+        : (data.updatedAt || data.createdAt)
+
+      if (latestTimeStamp) {
+        const timestamp = new Date(latestTimeStamp).getTime()
+
+        const markets = [`${data.from}-USD`, `${data.to}-USD`, `${data.from}-${data.to}`].map(market => {
+          return agent.get('/api/dash/rate', { params: { market, timestamp } })
+            .then(response => response.data.result)
+        })
+
+        const [fromUsdRate, toUsdRate, marketRate] = await Promise.all(markets)
+
+        this.latestfromAmountUsd = this.formatUnitToCurrency(data.fromAmount, data.from) * fromUsdRate
+        this.changeInfromAmountUsd = Math.ceil(((this.latestfromAmountUsd - data.fromAmountUsd) / data.fromAmountUsd) * 10000) / 100
+
+        this.latesttoAmountUsd = this.formatUnitToCurrency(data.toAmount, data.to) * toUsdRate
+        this.changeIntoAmountUsd = Math.ceil(((this.latesttoAmountUsd - data.toAmountUsd) / data.toAmountUsd) * 10000) / 100
+
+        this.latestMarketRate = marketRate
+        this.changeInMarketRate = Math.ceil(((marketRate - data.rate) / data.rate) * 10000) / 100
+      }
+
+      const rates = await Promise.all([...timestampSet].map(
+        timestamp => agent.get('/api/dash/rate', { params: { market: `${data.from}-${data.to}`, timestamp } }
+        ).then(response => ({ timestamp, rate: response.data.result }))
+      ))
+
+      this.rates = rates.reduce((acc, { timestamp, rate }) => {
+        acc[timestamp] = rate
+        return acc
+      }, {})
     }
-
-    const rates = await Promise.all([...timestampSet].map(
-      timestamp => agent.get('/api/dash/rate', { params: { market: `${data.from}-${data.to}`, timestamp } }
-      ).then(response => ({ timestamp, rate: response.data.result }))
-    ))
-
-    this.rates = rates.reduce((acc, { timestamp, rate }) => {
-      acc[timestamp] = rate
-      return acc
-    }, {})
   }
 }
 </script>
