@@ -32,7 +32,7 @@ export default {
   },
   computed: {
     perc () {
-      return this.calculatePerc(this.summary.current[this.type], this.summary.compare[this.type])
+      return this.calculatePerc(this.summary.current[this.type], this.summary.compare[this.type]) || 0
     }
   }
 }

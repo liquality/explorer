@@ -309,6 +309,7 @@
 </template>
 
 <script>
+import Bluebird from 'bluebird'
 import { mapState, mapActions } from 'vuex'
 import qs from 'qs'
 import { min, max } from 'date-fns'
@@ -465,6 +466,8 @@ export default {
       return Math.ceil(((from - to) / from) * 10000) / 100
     },
     async fetchOrderPeriodically (periodic) {
+      clearTimeout(this.fetchTimeout)
+
       if (periodic) {
         this.backgroundLoading = true
       }
@@ -556,10 +559,12 @@ export default {
         this.changeInMarketRate = Math.ceil(((marketRate - data.rate) / data.rate) * 10000) / 100
       }
 
-      const rates = await Promise.all([...timestampSet].map(
-        timestamp => agent.get('/api/dash/rate', { params: { market: `${data.from}-${data.to}`, timestamp } }
-        ).then(response => ({ timestamp, rate: response.data.result }))
-      ))
+      const rates = await Bluebird.map(
+        [...timestampSet],
+        timestamp => agent.get(
+          '/api/dash/rate',
+          { params: { market: `${data.from}-${data.to}`, timestamp } }
+        ).then(response => ({ timestamp, rate: response.data.result })), { concurrency: 2 })
 
       this.rates = rates.reduce((acc, { timestamp, rate }) => {
         acc[timestamp] = rate

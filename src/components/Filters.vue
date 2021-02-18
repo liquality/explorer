@@ -1,6 +1,18 @@
 <template>
   <div class="toolbar">
     <nav class="nav flex-column mb-3">
+      <span class="nav-link small">Client</span>
+      <span :class="{
+        'nav-link': true,
+        active: userAgent.includes('WALLET')
+      }" @click="setUserAgent('WALLET')">Wallet</span>
+      <span :class="{
+        'nav-link': true,
+        active: userAgent.includes('UI')
+      }" @click="setUserAgent('UI')">UI</span>
+    </nav>
+
+    <nav class="nav flex-column mb-3">
       <span class="nav-link small">Pending Txs</span>
       <span :class="{
         'nav-link': true,
@@ -32,6 +44,10 @@
       <span class="nav-link small">Agent</span>
       <span :class="{
         'nav-link': true,
+        active: status.includes('AGENT_CONTRACT_FUNDED')
+      }" @click="setStatus('AGENT_CONTRACT_FUNDED')">Contract Created</span>
+      <span :class="{
+        'nav-link': true,
         active: status.includes('AGENT_FUNDED')
       }" @click="setStatus('AGENT_FUNDED')">Funded</span>
       <span :class="{
@@ -50,18 +66,6 @@
         'nav-link': true,
         active: status.includes('SWAP_EXPIRED')
       }" @click="setStatus('SWAP_EXPIRED')">Swap Expired</span>
-    </nav>
-
-    <nav class="nav flex-column mb-3">
-      <span class="nav-link small">User Agent</span>
-      <span :class="{
-        'nav-link': true,
-        active: userAgent.includes('WALLET')
-      }" @click="setUserAgent('WALLET')">Wallet</span>
-      <span :class="{
-        'nav-link': true,
-        active: userAgent.includes('UI')
-      }" @click="setUserAgent('UI')">UI</span>
     </nav>
 
     <nav class="nav flex-column mb-3">
@@ -98,8 +102,8 @@ export default {
         'USER_FUNDED_UNVERIFIED',
         'USER_CLAIMED',
         'AGENT_CLAIMED',
+        'AGENT_CONTRACT_FUNDED',
         'AGENT_FUNDED',
-        'AGENT_CLAIMED',
         'AGENT_REFUNDED',
         'QUOTE_EXPIRED',
         'SWAP_EXPIRED'

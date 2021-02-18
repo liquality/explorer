@@ -108,6 +108,7 @@
 </template>
 
 <script>
+import Bluebird from 'bluebird'
 import { mapState, mapActions } from 'vuex'
 import format from '@/mixins/format'
 import LoadingTableBody from './LoadingTableBody.vue'
@@ -155,13 +156,13 @@ export default {
     if (this.user) {
       const orderCheckMap = {}
 
-      await Promise.all(this.list.map(async ({ orderId }) => {
+      await Bluebird.map(this.list, async ({ orderId }) => {
         const check = await this.checkOrder({ orderId })
 
         if (check && check.flags) {
           orderCheckMap[orderId] = check.flags
         }
-      }))
+      }, { concurrency: 2 })
 
       this.orderCheckMap = orderCheckMap
     }

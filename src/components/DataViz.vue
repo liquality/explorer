@@ -52,7 +52,13 @@
       <div class="col-md-3 mb-3">
         <div class="card">
           <LoadingCardBody v-if="!summary || loading" />
-          <SummaryCard v-else heading="Profit/Loss" :summary="summary" type="sum:totalFromToAmountUsdDiffWithFees" />
+          <SummaryCard v-else heading="Net P&L%" :summary="summary" type="average:pnlPerc" :plain="true" />
+        </div>
+      </div>
+      <div class="col-md-3 mb-3">
+        <div class="card">
+          <LoadingCardBody v-if="!summary || loading" />
+          <SummaryCard v-else heading="Net P&L" :summary="summary" type="sum:totalFromToAmountUsdDiffWithFees" />
         </div>
       </div>
       <div class="col-md-3 mb-3">
@@ -75,7 +81,7 @@
           <LoadingChart v-if="!lineCharts || loading" />
           <div class="card-body" v-else>
             <h2 class="h6 mb-4 font-weight-light text-muted">Incoming Volume</h2>
-            <LineChart :chartData="lineCharts['sum:fromAmountUsd'].data" :compareLabels="lineCharts['sum:fromAmountUsd'].compareLabels" :height="300" :usd="true" />
+            <LineChart :chartData="lineCharts['sum:fromAmountUsd'].data" :compareLabels="lineCharts['sum:fromAmountUsd'].compareLabels" :height="200" :usd="true" />
           </div>
         </div>
       </div>
@@ -84,7 +90,7 @@
           <LoadingChart v-if="!lineCharts || loading" />
           <div class="card-body" v-else>
             <h2 class="h6 mb-4 font-weight-light text-muted">Number of Swaps</h2>
-            <LineChart :chartData="lineCharts['count'].data" :compareLabels="lineCharts['count'].compareLabels" :height="300" />
+            <LineChart :chartData="lineCharts['count'].data" :compareLabels="lineCharts['count'].compareLabels" :height="200" />
           </div>
         </div>
       </div>
@@ -92,8 +98,8 @@
         <div class="card mb-4">
           <LoadingChart v-if="!lineCharts || loading" />
           <div class="card-body" v-else>
-            <h2 class="h6 mb-4 font-weight-light text-muted">Profit/Loss</h2>
-            <LineChart :chartData="lineCharts['sum:totalFromToAmountUsdDiffWithFees'].data" :compareLabels="lineCharts['sum:totalFromToAmountUsdDiffWithFees'].compareLabels" :height="300" :usd="true" />
+            <h2 class="h6 mb-4 font-weight-light text-muted">P&L</h2>
+            <LineChart :chartData="lineCharts['sum:totalFromToAmountUsdDiffWithFees'].data" :compareLabels="lineCharts['sum:totalFromToAmountUsdDiffWithFees'].compareLabels" :height="200" :usd="true" />
           </div>
         </div>
       </div>
@@ -102,7 +108,7 @@
           <LoadingChart v-if="!lineCharts || loading" />
           <div class="card-body" v-else>
             <h2 class="h6 mb-4 font-weight-light text-muted">Tx Fees</h2>
-            <LineChart :chartData="lineCharts['sum:totalAgentFeeUsd'].data" :compareLabels="lineCharts['sum:totalAgentFeeUsd'].compareLabels" :height="300" :usd="true" />
+            <LineChart :chartData="lineCharts['sum:totalAgentFeeUsd'].data" :compareLabels="lineCharts['sum:totalAgentFeeUsd'].compareLabels" :height="200" :usd="true" />
           </div>
         </div>
       </div>
@@ -111,7 +117,7 @@
           <LoadingChart v-if="!lineCharts || loading" />
           <div class="card-body" v-else>
             <h2 class="h6 mb-4 font-weight-light text-muted">Top 5 Markets By Incoming Volume</h2>
-            <BarChart :chartData="topMarketsByVolumeChart" :height="300" key="marketChart" />
+            <BarChart :chartData="topMarketsByVolumeChart" :height="200" key="marketChart" />
           </div>
         </div>
       </div>
@@ -120,7 +126,7 @@
           <LoadingChart v-if="!lineCharts || loading" />
           <div class="card-body" v-else>
             <h2 class="h6 mb-4 font-weight-light text-muted">Incoming Volume By Application</h2>
-            <BarChart :chartData="volumeByApplicationsChart" :height="300" key="walletChart" />
+            <BarChart :chartData="volumeByApplicationsChart" :height="200" key="walletChart" />
           </div>
         </div>
       </div>
@@ -129,7 +135,7 @@
 </template>
 
 <script>
-import { getTime, subDays, differenceInDays } from 'date-fns'
+import { getTime, subDays, differenceInDays, startOfDay, endOfDay } from 'date-fns'
 import VueCtkDateTimePicker from 'vue-ctk-date-time-picker'
 import 'vue-ctk-date-time-picker/dist/vue-ctk-date-time-picker.css'
 
@@ -154,7 +160,7 @@ export default {
     LoadingChart,
     SummaryCard
   },
-  props: ['address'],
+  props: ['address', 'filters'],
   data () {
     return {
       date: null,
@@ -168,16 +174,18 @@ export default {
   },
   computed: {
     range () {
-      const start = new Date(this.date.start)
-      const end = new Date(this.date.end)
+      const start = startOfDay(new Date(this.date.start))
+      const end = endOfDay(new Date(this.date.end))
       const days = differenceInDays(new Date(end), new Date(start)) + 1
 
       return {
-        start: start,
-        end: end,
+        current: {
+          start: start,
+          end: end
+        },
         compare: {
-          start: subDays(start, days),
-          end: subDays(end, days)
+          start: startOfDay(subDays(start, days)),
+          end: endOfDay(subDays(end, days))
         }
       }
     }
@@ -194,9 +202,15 @@ export default {
     this.fillData()
   },
   methods: {
-    async fillData () {
+    async fillData (noEmit) {
+      if (!noEmit) this.$emit('rangeUpdate', this.range)
+
       this.loading = true
-      const [current, compare] = await Promise.all([this.getData(this.range), this.getData(this.range.compare)])
+
+      const [current, compare] = await Promise.all([
+        this.getData(this.range.current),
+        this.getData(this.range.compare)
+      ])
       this.loading = false
 
       this.summary = {
@@ -304,12 +318,16 @@ export default {
         }]
       }
     },
+    trimDp (value) {
+      return Math.ceil(value * 10000) / 10000
+    },
     async getData (range) {
       const { data: { result: { stats: data } } } = await agent.get('/api/dash/stats', {
         params: {
           start: getTime(range.start),
           end: getTime(range.end),
-          address: this.address
+          address: this.address,
+          ...(this.filters || {})
         }
       })
 
@@ -368,8 +386,17 @@ export default {
       returnValue.markets = arr
       returnValue.summary['average:fromAmountUsd'] = (Math.ceil((returnValue.summary['sum:fromAmountUsd'] / returnValue.summary.count) * 100) / 100) || 0
       returnValue.summary['ui:sum:fromAmountUsd'] = returnValue.summary['sum:fromAmountUsd'] - returnValue.summary['wallet:sum:fromAmountUsd']
+      returnValue.summary['average:pnlPerc'] = (this.trimDp(returnValue.summary['sum:totalFromToAmountUsdDiffWithFees'] / returnValue.summary['sum:fromAmountUsd']) * 100) || 0
 
       return returnValue
+    }
+  },
+  watch: {
+    filters: {
+      deep: true,
+      handler () {
+        this.fillData(true)
+      }
     }
   }
 }
