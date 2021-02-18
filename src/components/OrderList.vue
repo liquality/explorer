@@ -49,9 +49,9 @@
             <router-link :to="'/order/' + item.orderId">
               ${{formatAmount(item.fromAmountUsd, 'USD')}}<br>
               <small :class="{
-                'text-danger': percProfit(item.fromAmountUsd, item.toAmountUsd) < 0,
-                'text-success': percProfit(item.fromAmountUsd, item.toAmountUsd) >= 0
-              }">{{percProfit(item.fromAmountUsd, item.toAmountUsd)}}%</small>
+                'text-danger': percProfit(item.fromAmountUsd - item.totalAgentFeeUsd, item.toAmountUsd) < 0,
+                'text-success': percProfit(item.fromAmountUsd - item.totalAgentFeeUsd, item.toAmountUsd) >= 0
+              }">{{percProfit(item.fromAmountUsd - item.totalAgentFeeUsd, item.toAmountUsd)}}%</small>
             </router-link>
           </td>
           <td class="text-right">

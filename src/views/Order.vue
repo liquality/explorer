@@ -91,6 +91,16 @@
                 </td>
               </tr>
               <tr>
+                <td class="text-muted text-right small-12">Net P&L</td>
+                <td :class="{
+                  'text-danger': ((order.fromAmountUsd - order.totalAgentFeeUsd) - order.toAmountUsd) < 0,
+                  'text-success': ((order.fromAmountUsd - order.totalAgentFeeUsd) - order.toAmountUsd) >= 0
+                }">
+                  ${{formatAmount((order.fromAmountUsd - order.totalAgentFeeUsd) - order.toAmountUsd, 'USD')}}
+                  ({{percProfit(order.fromAmountUsd - order.totalAgentFeeUsd, order.toAmountUsd)}}%)
+                </td>
+              </tr>
+              <tr>
                 <td class="text-muted text-right small-12">Cost of Swap</td>
                 <td>
                   ${{formatAmount(order.totalFeeUsd, 'USD')}} <span class="text-muted">(Agent: ${{formatAmount(order.totalAgentFeeUsd, 'USD')}}, User: ${{formatAmount(order.totalUserFeeUsd, 'USD')}})</span>
