@@ -1,6 +1,6 @@
 <template>
 <div class="order-timeline">
-  <div class="card font-weight-normal" v-for="(audit, idx) in auditLogs" :key="audit._id">
+  <div class="card font-weight-normal" v-for="(audit, idx) in logs" :key="audit._id">
     <div class="card-body">
       <div v-if="audit.orderStatus === 'QUOTE'">
         <User class="icon-user" />
@@ -22,6 +22,13 @@
         <User />
         <p class="mb-0">User has refunded the swap</p>
       </div>
+      <div v-else-if="audit.context === 'AUTH' && audit.status === 'AUTO_APPROVED'">
+        <Approve />
+        <p class="mb-0">
+          Agent has auto approved the order<br>
+          <em v-if="audit.extra.message" class="small text-muted">({{audit.extra.message}})</em>
+        </p>
+      </div>
       <div v-else-if="audit.context === 'AUTH' && audit.status === 'APPROVED'">
         <Approve />
         <p class="mb-0">
@@ -34,9 +41,13 @@
         <p class="mb-0">Agent has rejected the order</p>
         <em v-if="audit.extra.message" class="ml-2 small text-muted">({{audit.extra.message}})</em>
       </div>
-      <div v-else-if="audit.orderStatus === 'USER_FUNDED'">
+      <div v-else-if="audit.orderStatus === 'USER_FUNDED' && audit.context === 'VERIFY_USER_INIT_TX' && !audit.waiting">
         <Robot />
         <p class="mb-0">Agent has confirmed user's funding transaction</p>
+      </div>
+      <div v-else-if="audit.orderStatus === 'USER_FUNDED' && audit.context === 'VERIFY_USER_INIT_TX'">
+        <Robot />
+        <p class="mb-0">Agent is waiting for order approval</p>
       </div>
       <div v-else-if="audit.context === 'RECIPROCATE_INIT_SWAP'">
         <Robot />
@@ -80,7 +91,7 @@
         </span>
       </div>
     </div>
-    <div class="card-body" v-if="idx < (auditLogs.length - 1)">
+    <div class="card-body" v-if="idx < (auditLogs.length - 1) && !audit.nextWaiting">
       <div class="text-muted small align-items-center">
         <div class="time-diff"><div></div></div>
         <p class="mb-0"><em>+{{formatDurationStrict(auditMap[audit.key].end, auditMap[auditLogs[idx + 1].key].start, false)}}</em></p>
@@ -110,6 +121,28 @@ export default {
     auditMap: Object,
     rates: Object,
     order: Object
+  },
+  computed: {
+    logs () {
+      const logs = [...this.auditLogs]
+      const index = logs.findIndex(l => l.orderStatus === 'USER_FUNDED' && l.context === 'VERIFY_USER_INIT_TX')
+
+      if (index >= 0) {
+        const thatLog = {
+          ...logs[index],
+          nextWaiting: true
+        }
+        const newLog = {
+          ...logs[index],
+          waiting: true
+        }
+
+        logs.splice(index, 1, thatLog)
+        logs.splice(index + 1, 0, newLog)
+      }
+
+      return logs
+    }
   }
 }
 </script>
