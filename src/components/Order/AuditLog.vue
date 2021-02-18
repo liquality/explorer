@@ -40,7 +40,11 @@
       </div>
       <div v-else-if="audit.context === 'RECIPROCATE_INIT_SWAP'">
         <Robot />
-        <p class="mb-0">Agent has reciprocated funding transaction</p>
+        <p class="mb-0">Agent has created the swap contract</p>
+      </div>
+      <div v-else-if="audit.context === 'FUND_SWAP'">
+        <Robot />
+        <p class="mb-0">Agent has funded the swap contract</p>
       </div>
       <div v-else-if="audit.status === 'AGENT_CLAIM_WAITING'">
         <Robot />
