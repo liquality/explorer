@@ -394,8 +394,8 @@ export default {
         ccy2Addr: order.toAddress,
         ccy2CounterPartyAddr: order.toCounterPartyAddress,
 
-        aFundHash: order.fromFundHash,
-        bFundHash: order.toFundHash,
+        aInitiationHash: order.fromFundHash,
+        bInitiationHash: order.toFundHash,
 
         secretHash: order.secretHash,
         expiration: order.swapExpiration,
