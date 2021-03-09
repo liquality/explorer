@@ -65,6 +65,10 @@
                 </td>
               </tr>
               <tr>
+                <td class="text-muted text-right small-12">Spread</td>
+                <td>{{order.spread * 100}}%</td>
+              </tr>
+              <tr>
                 <td class="text-muted text-right small-12">Time</td>
                 <td>
                   {{formatDate(order.createdAt)}}
