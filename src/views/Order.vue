@@ -69,6 +69,16 @@
                 <td>{{order.spread * 100}}%</td>
               </tr>
               <tr>
+                <td class="text-muted text-right small-12">Net P&amp;L</td>
+                <td :class="{
+                  'text-danger': ((order.fromAmountUsd - order.totalAgentFeeUsd) - order.toAmountUsd) < 0,
+                  'text-success': ((order.fromAmountUsd - order.totalAgentFeeUsd) - order.toAmountUsd) >= 0
+                }">
+                  ${{formatAmount((order.fromAmountUsd - order.totalAgentFeeUsd) - order.toAmountUsd, 'USD')}}
+                  ({{percProfit(order.fromAmountUsd - order.totalAgentFeeUsd, order.toAmountUsd)}}%)
+                </td>
+              </tr>
+              <tr>
                 <td class="text-muted text-right small-12">Time</td>
                 <td>
                   {{formatDate(order.createdAt)}}
@@ -92,16 +102,6 @@
                       'text-success': changeInMarketRate >= 0
                     }">{{changeInMarketRate}}%</span>
                   </span>
-                </td>
-              </tr>
-              <tr>
-                <td class="text-muted text-right small-12">Net P&L</td>
-                <td :class="{
-                  'text-danger': ((order.fromAmountUsd - order.totalAgentFeeUsd) - order.toAmountUsd) < 0,
-                  'text-success': ((order.fromAmountUsd - order.totalAgentFeeUsd) - order.toAmountUsd) >= 0
-                }">
-                  ${{formatAmount((order.fromAmountUsd - order.totalAgentFeeUsd) - order.toAmountUsd, 'USD')}}
-                  ({{percProfit(order.fromAmountUsd - order.totalAgentFeeUsd, order.toAmountUsd)}}%)
                 </td>
               </tr>
               <tr>
