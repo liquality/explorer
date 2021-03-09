@@ -66,11 +66,11 @@
         <p class="mb-0">User has claimed agent's funding transaction</p>
       </div>
       <div v-else-if="audit.orderStatus === 'AGENT_CLAIMED'">
-        <Robot />
+        <Finish />
         <p class="mb-0">Agent has claimed user's funding transaction</p>
       </div>
       <div v-else-if="audit.orderStatus === 'AGENT_REFUNDED'">
-        <Robot />
+        <Refund />
         <p class="mb-0">Agent has refunded</p>
       </div>
       <div v-else>
@@ -107,6 +107,8 @@ import User from '@/components/Icons/User.vue'
 import Robot from '@/components/Icons/Robot.vue'
 import Approve from '@/components/Icons/Approve.vue'
 import Reject from '@/components/Icons/Reject.vue'
+import Finish from '@/components/Icons/Finish.vue'
+import Refund from '@/components/Icons/Refund.vue'
 
 export default {
   mixins: [format],
@@ -114,7 +116,9 @@ export default {
     User,
     Robot,
     Approve,
-    Reject
+    Reject,
+    Finish,
+    Refund
   },
   props: {
     auditLogs: Array,

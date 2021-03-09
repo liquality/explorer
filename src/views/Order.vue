@@ -64,7 +64,7 @@
                   {{formatAmount(order.toAmount, order.to, true)}} {{order.to}}
                 </td>
               </tr>
-              <tr>
+              <tr v-if="!isNaN(order.spread)">
                 <td class="text-muted text-right small-12">Spread</td>
                 <td>{{order.spread * 100}}%</td>
               </tr>
