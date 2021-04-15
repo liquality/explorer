@@ -23,7 +23,7 @@
           </form>
         </div>
       </div>
-      <div class="card border-top-0 mb-5">
+      <div class="card border-top-0 mb-3">
         <div class="table-responsive">
           <table class="table bg-white m-0 table-order-details">
             <LoadingTableBody :trCount="20" :tdCount="2" v-if="!order" />
@@ -312,6 +312,68 @@
               </tr>
             </tbody>
           </table>
+        </div>
+      </div>
+
+      <div v-if="order" class="mb-5">
+        <div class="card border-top-0 mb-3" v-for="(job, index) in order.job_data" :key="index">
+          <div class="table-responsive">
+            <table class="table bg-white m-0 table-order-details">
+              <tbody class="font-weight-normal">
+                <tr>
+                  <td class="text-muted text-right small-12">Job</td>
+                  <td>{{job.name}}</td>
+                </tr>
+                <tr v-if="job.failReason">
+                  <td class="text-right small-12 text-danger">Error</td>
+                  <td>
+                    <pre class="text-danger mb-0"><code>{{job.failReason}}</code></pre>
+                  </td>
+                </tr>
+                <tr v-if="job.failReason">
+                  <td class="text-right small-12 text-danger">Failed At</td>
+                  <td class="text-danger">
+                    <span>{{formatDate(job.failedAt)}}</span>
+                    <span class="ml-2">({{formatDurationStrict(job.failedAt)}})</span>
+                  </td>
+                </tr>
+                <tr v-if="job.failReason">
+                  <td class="text-right small-12 text-danger">Fail Count</td>
+                  <td class="text-danger">
+                    {{job.failCount}}
+                  </td>
+                </tr>
+                <tr v-if="job.lastFinishedAt">
+                  <td class="text-right small-12 text-muted">Last Finished At</td>
+                  <td>
+                    <span>{{formatDate(job.lastFinishedAt)}}</span>
+                    <span class="text-muted ml-2">({{formatDurationStrict(job.lastFinishedAt)}})</span>
+                  </td>
+                </tr>
+                <tr v-if="job.lastRunAt">
+                  <td class="text-right small-12 text-muted">Last Run At</td>
+                  <td>
+                    <span>{{formatDate(job.lastRunAt)}}</span>
+                    <span class="text-muted ml-2">({{formatDurationStrict(job.lastRunAt)}})</span>
+                  </td>
+                </tr>
+                <tr v-if="job.nextRunAt">
+                  <td class="text-right small-12 text-muted">Next Run At</td>
+                  <td>
+                    <span>{{formatDate(job.nextRunAt)}}</span>
+                    <span class="text-muted ml-2">({{formatDurationStrict(job.nextRunAt)}})</span>
+                  </td>
+                </tr>
+                <tr v-if="job.lockedAt">
+                  <td class="text-right small-12 text-muted">Locked At</td>
+                  <td>
+                    <span>{{formatDate(job.lockedAt)}}</span>
+                    <span class="text-muted ml-2">({{formatDurationStrict(job.lockedAt)}})</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
