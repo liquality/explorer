@@ -67,9 +67,17 @@ export default {
       this.range = range
       this.safeBrowse()
     },
-    safeBrowse: debounce(function () { this.browse() }, 500),
-    async browse () {
-      this.loading = true
+    safeBrowse: debounce(function (fromTimeout) { this.browse(fromTimeout) }, 500),
+    async browse (fromTimeout) {
+      clearTimeout(this.fetchTimeout)
+      if (this.httpPending) return
+      this.httpPending = true
+
+      if (fromTimeout === true) {
+        this.backgroundLoading = true
+      } else {
+        this.loading = true
+      }
 
       const { data } = await agent.get('/api/dash/orders', {
         params: {
@@ -82,11 +90,15 @@ export default {
         }
       })
 
+      this.loading = false
+
       this.backgroundLoading = false
 
       this.swaps = data.result
 
-      this.loading = false
+      this.fetchTimeout = setTimeout(this.browse, 2500, true)
+
+      this.httpPending = false
     }
   },
   watch: {
