@@ -16,12 +16,12 @@
       <span class="nav-link small">Pending Txs</span>
       <span :class="{
         'nav-link': true,
-        active: pending.includes('USER')
-      }" @click="setPending('USER')">Agent</span>
+        active: pending.includes('AGENT')
+      }" @click="setPending('AGENT')">Agent</span>
       <span :class="{
         'nav-link d-flex align-items-center': true,
-        active: pending.includes('AGENT')
-      }" @click="setPending('AGENT')">User</span>
+        active: pending.includes('USER')
+      }" @click="setPending('USER')">User</span>
     </nav>
 
     <nav class="nav flex-column mb-3">
