@@ -53,6 +53,37 @@ export default new Vuex.Store({
 
       return false
     },
+    async orderRetry ({ commit }, { orderId, jobName }) {
+      try {
+        const { data } = await agent.post('/api/user/order/retry', {
+          orderId,
+          jobName
+        })
+
+        if (data && data.success) {
+          return true
+        }
+      } catch (e) {
+        console.error(e)
+      }
+
+      return false
+    },
+    async orderIgnore ({ commit }, { orderId }) {
+      try {
+        const { data } = await agent.post('/api/user/order/ignore', {
+          orderId
+        })
+
+        if (data && data.success) {
+          return true
+        }
+      } catch (e) {
+        console.error(e)
+      }
+
+      return false
+    },
     async checkUser ({ commit }) {
       try {
         const { data } = await agent.get('/api/user')

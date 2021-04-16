@@ -8,19 +8,44 @@
       <p class="lead font-weight-light text-muted">
         {{orderId}}
       </p>
-      <div class="card mb-3" v-if="user && showTable && noFlags">
-        <div class="card-body">
-          <form @submit.prevent="update" class="form-inline justify-content-center">
-            <select class="form-control mr-2" v-model="action" :disabled="loading">
-              <option value="approve">Approve</option>
-              <option value="reject">Reject</option>
-            </select>
-            <select class="form-control mr-2" v-model="type" :disabled="loading">
-              <option value="reciprocate-init-swap">Reciprocate Swap</option>
-            </select>
-            <input type="text" class="form-control mr-2" placeholder="Message" v-model="message" required :disabled="loading">
-            <button type="submit" class="btn btn-primary" :disabled="loading">Update</button>
-          </form>
+      <div v-if="user">
+        <div class="card mb-3" v-if="showTable && noFlags">
+          <div class="card-body">
+            <form @submit.prevent="approveReject" class="form-inline">
+              <label class="mr-2">Approve/Reject</label>
+              <select class="form-control mr-2" v-model="action" :disabled="loading" required>
+                <option value="approve">Approve</option>
+                <option value="reject">Reject</option>
+              </select>
+              <select class="form-control mr-2" v-model="type" :disabled="loading">
+                <option value="reciprocate-init-swap">Reciprocate Swap</option>
+              </select>
+              <input type="text" class="form-control mr-2" placeholder="Message" v-model="message" required :disabled="loading">
+              <button type="submit" class="btn btn-primary" :disabled="loading">Update</button>
+            </form>
+          </div>
+        </div>
+        <div class="card mb-3">
+          <div class="card-body">
+            <form @submit.prevent="orderRetryNow" class="form-inline">
+              <label class="mr-2">Retry</label>
+              <select class="form-control mr-2" v-model="retryJobName" :disabled="loading" required>
+                <option value="reciprocate-init-swap">reciprocate-init-swap</option>
+                <option value="fund-swap">fund-swap</option>
+                <option value="find-claim-tx-or-refund">find-claim-tx-or-refund</option>
+                <option value="agent-claim">agent-claim</option>
+              </select>
+              <button type="submit" class="btn btn-primary" :disabled="loading">Submit</button>
+            </form>
+          </div>
+        </div>
+        <div class="card mb-3">
+          <div class="card-body">
+            <form @submit.prevent="orderIgnoreNow" class="form-inline">
+              <label class="mr-2">Ignore</label>
+              <button type="submit" class="btn btn-primary" :disabled="loading">Mark as expired</button>
+            </form>
+          </div>
         </div>
       </div>
       <div class="card border-top-0 mb-3">
@@ -427,7 +452,9 @@ export default {
       type: null,
       message: null,
       loading: false,
-      backgroundLoading: false
+      backgroundLoading: false,
+
+      retryJobName: null
     }
   },
   created () {
@@ -513,8 +540,8 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['checkOrder', 'updateOrder']),
-    async update () {
+    ...mapActions(['checkOrder', 'updateOrder', 'orderRetry', 'orderIgnore']),
+    async approveReject () {
       this.loading = true
 
       await this.updateOrder({
@@ -525,6 +552,25 @@ export default {
       })
 
       this.check = await this.checkOrder({ orderId: this.orderId })
+
+      this.loading = false
+    },
+    async orderRetryNow () {
+      this.loading = true
+
+      await this.orderRetry({
+        orderId: this.order.orderId,
+        jobName: this.retryJobName
+      })
+
+      this.loading = false
+    },
+    async orderIgnoreNow () {
+      this.loading = true
+
+      await this.orderIgnore({
+        orderId: this.order.orderId
+      })
 
       this.loading = false
     },
