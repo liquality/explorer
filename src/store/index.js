@@ -69,11 +69,15 @@ export default new Vuex.Store({
 
       return false
     },
-    async orderIgnore ({ commit }, { orderId }) {
+    async orderIgnore ({ commit }, { orderId, setQuoteExpired }) {
+      const opts = { orderId }
+
+      if (setQuoteExpired) {
+        opts.setQuoteExpired = true
+      }
+
       try {
-        const { data } = await agent.post('/api/user/order/ignore', {
-          orderId
-        })
+        const { data } = await agent.post('/api/user/order/ignore', opts)
 
         if (data && data.success) {
           return true

@@ -8,7 +8,7 @@
       <p class="lead font-weight-light text-muted">
         {{orderId}}
       </p>
-      <div v-if="user">
+      <div>
         <div class="card mb-3" v-if="showTable && noFlags">
           <div class="card-body">
             <form @submit.prevent="approveReject" class="form-inline">
@@ -43,7 +43,9 @@
           <div class="card-body">
             <form @submit.prevent="orderIgnoreNow" class="form-inline">
               <label class="mr-2">Ignore</label>
-              <button type="submit" class="btn btn-primary" :disabled="loading">Mark as expired</button>
+              <input type="checkbox" id="ignoreSetQuoteExpired" v-model="ignoreSetQuoteExpired" class="form-check-input">
+              <label for="ignoreSetQuoteExpired" class="mr-2">Mark as expired</label>
+              <button type="submit" class="btn btn-primary" :disabled="loading">Submit</button>
             </form>
           </div>
         </div>
@@ -454,7 +456,8 @@ export default {
       loading: false,
       backgroundLoading: false,
 
-      retryJobName: null
+      retryJobName: null,
+      ignoreSetQuoteExpired: null
     }
   },
   created () {
@@ -569,7 +572,8 @@ export default {
       this.loading = true
 
       await this.orderIgnore({
-        orderId: this.order.orderId
+        orderId: this.order.orderId,
+        setQuoteExpired: this.ignoreSetQuoteExpired
       })
 
       this.loading = false
