@@ -8,7 +8,7 @@
       <p class="lead font-weight-light text-muted">
         {{orderId}}
       </p>
-      <div>
+      <div v-if="user">
         <div class="card mb-3" v-if="showTable && noFlags">
           <div class="card-body">
             <form @submit.prevent="approveReject" class="form-inline">
