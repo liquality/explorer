@@ -1,5 +1,5 @@
 import { isFuture, formatDistance, formatDistanceStrict, format, isEqual, parseISO as parseISOMain } from 'date-fns'
-import cryptoassets from '@liquality/cryptoassets'
+import { assets, chains, unitToCurrency } from '@liquality/cryptoassets'
 import BN from 'bignumber.js'
 
 const usdFormatter = new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 })
@@ -52,7 +52,7 @@ export default {
     },
     parseISO,
     formatUnitToCurrency (value, asset) {
-      return cryptoassets[asset].unitToCurrency(value)
+      return unitToCurrency(assets[asset], value)
     },
     formatAssetValue (value, asset, trim = false) {
       if (trim) {
@@ -71,7 +71,7 @@ export default {
         return n + ((d && d !== '00') ? `.${d}` : '')
       }
 
-      const amount = cryptoassets[asset].unitToCurrency(value)
+      const amount = unitToCurrency(assets[asset], value)
 
       if (trim) {
         const prettyAmount = BN(amount).dp(DP_PRETTY_MAP[asset], BN.ROUND_FLOOR)
@@ -96,7 +96,7 @@ export default {
       return format(parseISO(value), 'd MMM yyyy p')
     },
     formatAddress (address, asset) {
-      return cryptoassets[asset].formatAddress(address)
+      return chains[assets[asset].chain].formatAddress(address)
     },
     formatTxHash (txHash, asset) {
       const obj = EXPLORER_MAP[asset] || EXPLORER_MAP.ETH
