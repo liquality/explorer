@@ -16,7 +16,7 @@
 </template>
 
 <script>
-import cryptoassets from '@liquality/cryptoassets'
+import { assets, chains } from '@liquality/cryptoassets'
 import format from '@/mixins/format'
 
 export default {
@@ -39,7 +39,7 @@ export default {
       return this.order.txMap[this.hash]
     },
     feeUnit () {
-      return cryptoassets[this.asset].fees.unit
+      return chains[assets[this.asset].chain].fees.unit
     }
   }
 }

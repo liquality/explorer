@@ -12,7 +12,7 @@
     "node": "^14.15.1"
   },
   "dependencies": {
-    "@liquality/cryptoassets": "^0.2.4",
+    "@liquality/cryptoassets": "^1.1.0",
     "axios": "^0.19.2",
     "bluebird": "^3.7.2",
     "bootstrap": "^4.5.0",
