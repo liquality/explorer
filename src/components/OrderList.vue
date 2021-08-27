@@ -31,7 +31,7 @@
       </thead>
       <LoadingTableBody :trCount="50" :tdCount="user ? 8 : 7" v-if="loading" />
       <tbody class="font-weight-normal" v-else>
-        <OrderListItem v-for="item in list" :key="item.orderId" :class="{
+        <OrderListItem v-for="item in list" :key="item.orderId" :item="item" :class="{
           'unconfirmed-tx': !['SWAP_EXPIRED', 'QUOTE_EXPIRED', 'AGENT_REFUNDED', 'AGENT_CLAIMED'].includes(item.status)
         }" />
       </tbody>
