@@ -13,15 +13,11 @@
     </nav>
 
     <nav class="nav flex-column mb-3">
-      <span class="nav-link small">Pending Txs</span>
+      <span class="nav-link small">Pending Swaps</span>
       <span :class="{
         'nav-link': true,
-        active: pending.includes('AGENT')
-      }" @click="setPending('AGENT')">Agent</span>
-      <span :class="{
-        'nav-link d-flex align-items-center': true,
-        active: pending.includes('USER')
-      }" @click="setPending('USER')">User</span>
+        active: status.every(s => ['USER_CLAIMED', 'AGENT_CONTRACT_FUNDED', 'AGENT_FUNDED'].includes(s))
+      }" @click="setPendingSwaps()">Agent</span>
     </nav>
 
     <nav class="nav flex-column mb-3">
@@ -136,6 +132,9 @@ export default {
       } else {
         this.status.push(status)
       }
+    },
+    setPendingSwaps () {
+      this.status = ['USER_CLAIMED', 'AGENT_CONTRACT_FUNDED', 'AGENT_FUNDED']
     },
     setPending (pending) {
       if (this.pending.includes(pending)) {

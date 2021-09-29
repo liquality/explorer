@@ -96,7 +96,7 @@ export default {
 
       this.swaps = data.result
 
-      this.fetchTimeout = setTimeout(this.browse, 2500, true)
+      this.fetchTimeout = setTimeout(this.safeBrowse, 5000, true)
 
       this.httpPending = false
     }
