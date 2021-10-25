@@ -13,7 +13,9 @@ const DP_PRETTY_MAP = {
   USDC: 6,
   USDT: 6,
   WBTC: 6,
-  UNI: 6
+  UNI: 6,
+  NEAR: 6,
+  LUNA: 6
 }
 
 function parseISO (value) {
