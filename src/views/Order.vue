@@ -30,6 +30,7 @@
             <form @submit.prevent="orderRetryNow" class="form-inline">
               <label class="mr-2">Retry</label>
               <select class="form-control mr-2" v-model="retryJobName" :disabled="loading" required>
+                <option value="verify-user-init-tx">verify-user-init-tx</option>
                 <option value="reciprocate-init-swap">reciprocate-init-swap</option>
                 <option value="fund-swap">fund-swap</option>
                 <option value="find-claim-tx-or-refund">find-claim-tx-or-refund</option>

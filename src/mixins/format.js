@@ -5,19 +5,6 @@ import BN from 'bignumber.js'
 const usdFormatter = new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 })
 const coinFormatter = new Intl.NumberFormat('en-US')
 
-const DP_PRETTY_MAP = {
-  BTC: 6,
-  RBTC: 6,
-  ETH: 6,
-  DAI: 6,
-  USDC: 6,
-  USDT: 6,
-  WBTC: 6,
-  UNI: 6,
-  NEAR: 6,
-  LUNA: 6
-}
-
 function parseISO (value) {
   if (value instanceof Date) return value
   return parseISOMain(value)
@@ -58,7 +45,7 @@ export default {
     },
     formatAssetValue (value, asset, trim = false) {
       if (trim) {
-        const prettyAmount = BN(value).dp(DP_PRETTY_MAP[asset], BN.ROUND_FLOOR)
+        const prettyAmount = BN(value).dp(6, BN.ROUND_FLOOR)
         const [n, d] = String(prettyAmount).split('.')
         return coinFormatter.format(Number(n)) + (d ? `.${d}` : '')
       }
@@ -76,7 +63,7 @@ export default {
       const amount = unitToCurrency(assets[asset], value)
 
       if (trim) {
-        const prettyAmount = BN(amount).dp(DP_PRETTY_MAP[asset], BN.ROUND_FLOOR)
+        const prettyAmount = BN(amount).dp(6, BN.ROUND_FLOOR)
         const [n, d] = String(prettyAmount).split('.')
         return coinFormatter.format(Number(n)) + (d ? `.${d}` : '')
       }
