@@ -1,5 +1,5 @@
-@import "overrides";
-@import "bootstrap";
+@import 'overrides';
+@import 'bootstrap';
 
 %label {
   @extend .text-muted;
@@ -8,7 +8,9 @@
   text-transform: uppercase;
 }
 
-.nav-link.small, small.label, .small.label {
+.nav-link.small,
+small.label,
+.small.label {
   @extend %label;
 }
 
@@ -16,15 +18,15 @@
   white-space: nowrap;
 
   &.active {
-    color: $primary!important;
+    color: $primary !important;
     font-weight: 500;
   }
 }
 
 .table {
-  border-radius: $border-radius!important;
-  border-collapse: separate!important;
-  border-spacing: 0!important;
+  border-radius: $border-radius !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
 
   thead > tr td {
     border: 0;
@@ -42,8 +44,8 @@
   animation-iteration-count: infinite;
   animation-name: placeHolderShimmer;
   animation-timing-function: linear;
-  background: #F6F6F6;
-  background: linear-gradient(to right, #F6F6F6 8%, #F0F0F0 18%, #F6F6F6 33%);
+  background: #f6f6f6;
+  background: linear-gradient(to right, #f6f6f6 8%, #f0f0f0 18%, #f6f6f6 33%);
   background-size: 800px 104px;
   position: absolute;
   top: 0;
@@ -59,7 +61,8 @@
   min-height: $font-size-base;
 }
 
-.small, small {
+.small,
+small {
   &.loading-helper {
     min-height: $font-size-sm;
   }
@@ -70,11 +73,11 @@
 }
 
 @keyframes placeHolderShimmer {
-  0%{
-    background-position: -468px 0
+  0% {
+    background-position: -468px 0;
   }
-  100%{
-    background-position: 468px 0
+  100% {
+    background-position: 468px 0;
   }
 }
 
@@ -96,11 +99,26 @@
 
 @keyframes placeHolderShimmer {
   0% {
-    background-position: -468px 0
+    background-position: -468px 0;
   }
 
   100% {
-    background-position: 468px 0
+    background-position: 468px 0;
   }
 }
 
+.table-top-addresses {
+  tr > td {
+    vertical-align: middle;
+
+    &:first-child {
+      width: 1%;
+      white-space: nowrap;
+    }
+
+    &:last-child {
+      width: 1%;
+      white-space: nowrap;
+    }
+  }
+}

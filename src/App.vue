@@ -4,9 +4,19 @@
       <div class="container">
         <div class="collapse navbar-collapse">
           <router-link to="/" class="navbar-brand">
-            <img src="@/assets/liquality.svg" height="20">
+            <img src="@/assets/liquality.svg" height="20" />
           </router-link>
           <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+            <li class="nav-item">
+              <router-link to="/markets" class="nav-link" active-class="active">
+                Markets
+              </router-link>
+            </li>
+            <li class="nav-item">
+              <router-link to="/assets" class="nav-link" active-class="active">
+                Assets
+              </router-link>
+            </li>
             <li class="nav-item">
               <router-link to="/browse" class="nav-link" active-class="active">
                 Browse
@@ -24,7 +34,13 @@
             </li>
           </ul>
           <form @submit.prevent="submit" class="ml-3 my-2 my-lg-0 d-inline w-100">
-            <input type="text" class="form-control mr-sm-2" placeholder="Search for address, transaction, secret hash, or order ID" v-model="query" required>
+            <input
+              type="text"
+              class="form-control mr-sm-2"
+              placeholder="Search for address, transaction, secret hash, or order ID"
+              v-model="query"
+              required
+            />
           </form>
         </div>
       </div>
@@ -43,13 +59,13 @@ export default {
     title: 'Home',
     titleTemplate: '%s - Liquality Explorer'
   },
-  data () {
+  data() {
     return {
       query: null,
       loading: true
     }
   },
-  async created () {
+  async created() {
     if (this.$route.query.q) {
       this.query = this.$route.query.q
     }
@@ -63,7 +79,7 @@ export default {
   computed: mapState(['user']),
   methods: {
     ...mapActions(['logout', 'checkUser']),
-    submit (e) {
+    submit(e) {
       if (this.$route.query.q === this.query) return
       if (!this.query) return
 
