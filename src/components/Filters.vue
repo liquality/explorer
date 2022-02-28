@@ -2,86 +2,150 @@
   <div class="toolbar">
     <nav class="nav flex-column mb-3">
       <span class="nav-link small">Client</span>
-      <span :class="{
-        'nav-link': true,
-        active: userAgent.includes('WALLET')
-      }" @click="setUserAgent('WALLET')">Wallet</span>
-      <span :class="{
-        'nav-link': true,
-        active: userAgent.includes('UI')
-      }" @click="setUserAgent('UI')">UI</span>
+      <span
+        :class="{
+          'nav-link': true,
+          active: userAgent.includes('WALLET')
+        }"
+        @click="setUserAgent('WALLET')"
+        >Wallet</span
+      >
+      <span
+        :class="{
+          'nav-link': true,
+          active: userAgent.includes('UI')
+        }"
+        @click="setUserAgent('UI')"
+        >UI</span
+      >
     </nav>
 
     <nav class="nav flex-column mb-3">
       <span class="nav-link small">Pending Swaps</span>
-      <span :class="{
-        'nav-link': true,
-        active: status.every(s => ['USER_CLAIMED', 'AGENT_CONTRACT_FUNDED', 'AGENT_FUNDED'].includes(s))
-      }" @click="setPendingSwaps()">Agent</span>
+      <span
+        :class="{
+          'nav-link': true,
+          active: status.every(s => ['USER_CLAIMED', 'AGENT_CONTRACT_FUNDED', 'AGENT_FUNDED'].includes(s))
+        }"
+        @click="setPendingSwaps()"
+        >Agent</span
+      >
     </nav>
 
     <nav class="nav flex-column mb-3">
       <span class="nav-link small">User</span>
-      <span :class="{
-        'nav-link': true,
-        active: status.includes('USER_FUNDED')
-      }" @click="setStatus('USER_FUNDED')">Funded</span>
-      <span :class="{
-        'nav-link d-flex align-items-center': true,
-        active: status.includes('USER_FUNDED_UNVERIFIED')
-      }" @click="setStatus('USER_FUNDED_UNVERIFIED')">Funded <sup class="ml-2 text-muted">Pending</sup></span>
-      <span :class="{
-        'nav-link': true,
-        active: status.includes('USER_CLAIMED')
-      }" @click="setStatus('USER_CLAIMED')">Claimed</span>
+      <span
+        :class="{
+          'nav-link': true,
+          active: status.includes('USER_FUNDED')
+        }"
+        @click="setStatus('USER_FUNDED')"
+        >Funded</span
+      >
+      <span
+        :class="{
+          'nav-link d-flex align-items-center': true,
+          active: status.includes('USER_FUNDED_UNVERIFIED')
+        }"
+        @click="setStatus('USER_FUNDED_UNVERIFIED')"
+        >Funded <sup class="ml-2 text-muted">Pending</sup></span
+      >
+      <span
+        :class="{
+          'nav-link': true,
+          active: status.includes('USER_CLAIMED')
+        }"
+        @click="setStatus('USER_CLAIMED')"
+        >Claimed</span
+      >
     </nav>
 
     <nav class="nav flex-column mb-3">
       <span class="nav-link small">Agent</span>
-      <span :class="{
-        'nav-link': true,
-        active: status.includes('AGENT_CONTRACT_FUNDED')
-      }" @click="setStatus('AGENT_CONTRACT_FUNDED')">Contract Created</span>
-      <span :class="{
-        'nav-link': true,
-        active: status.includes('AGENT_FUNDED')
-      }" @click="setStatus('AGENT_FUNDED')">Funded</span>
-      <span :class="{
-        'nav-link': true,
-        active: status.includes('AGENT_CLAIMED')
-      }" @click="setStatus('AGENT_CLAIMED')">Claimed</span>
-      <span :class="{
-        'nav-link': true,
-        active: status.includes('AGENT_REFUNDED')
-      }" @click="setStatus('AGENT_REFUNDED')">Refunded</span>
-      <span :class="{
-        'nav-link': true,
-        active: status.includes('QUOTE_EXPIRED')
-      }" @click="setStatus('QUOTE_EXPIRED')">Quote Expired</span>
-      <span :class="{
-        'nav-link': true,
-        active: status.includes('SWAP_EXPIRED')
-      }" @click="setStatus('SWAP_EXPIRED')">Swap Expired</span>
+      <span
+        :class="{
+          'nav-link': true,
+          active: status.includes('AGENT_CONTRACT_FUNDED')
+        }"
+        @click="setStatus('AGENT_CONTRACT_FUNDED')"
+        >Contract Created</span
+      >
+      <span
+        :class="{
+          'nav-link': true,
+          active: status.includes('AGENT_FUNDED')
+        }"
+        @click="setStatus('AGENT_FUNDED')"
+        >Funded</span
+      >
+      <span
+        :class="{
+          'nav-link': true,
+          active: status.includes('AGENT_CLAIMED')
+        }"
+        @click="setStatus('AGENT_CLAIMED')"
+        >Claimed</span
+      >
+      <span
+        :class="{
+          'nav-link': true,
+          active: status.includes('AGENT_REFUNDED')
+        }"
+        @click="setStatus('AGENT_REFUNDED')"
+        >Refunded</span
+      >
+      <span
+        :class="{
+          'nav-link': true,
+          active: status.includes('QUOTE_EXPIRED')
+        }"
+        @click="setStatus('QUOTE_EXPIRED')"
+        >Quote Expired</span
+      >
+      <span
+        :class="{
+          'nav-link': true,
+          active: status.includes('SWAP_EXPIRED')
+        }"
+        @click="setStatus('SWAP_EXPIRED')"
+        >Swap Expired</span
+      >
+      <span
+        :class="{
+          'nav-link': true,
+          active: status.includes('QUOE_EXPIRED')
+        }"
+        @click="setStatus('QUOE_EXPIRED')"
+        >Quote Expired</span
+      >
     </nav>
 
     <nav class="nav flex-column mb-3">
       <span class="nav-link small">From</span>
       <span
-        v-for="market in markets" :key="market"
+        v-for="market in markets"
+        :key="market"
         :class="{
           'nav-link': true,
           active: fromMarkets.includes(market)
-        }" @click="setMarket(market, 'from')">{{market}}</span>
+        }"
+        @click="setMarket(market, 'from')"
+        >{{ market }}</span
+      >
     </nav>
 
     <nav class="nav flex-column mb-3">
       <span class="nav-link small">To</span>
       <span
-        v-for="market in markets" :key="market"
+        v-for="market in markets"
+        :key="market"
         :class="{
           'nav-link': true,
           active: toMarkets.includes(market)
-        }" @click="setMarket(market, 'to')">{{market}}</span>
+        }"
+        @click="setMarket(market, 'to')"
+        >{{ market }}</span
+      >
     </nav>
   </div>
 </template>
@@ -90,7 +154,7 @@
 import agent from '@/utils/agent'
 
 export default {
-  data () {
+  data() {
     return {
       pending: [],
       status: [
@@ -102,18 +166,16 @@ export default {
         'AGENT_FUNDED',
         'AGENT_REFUNDED',
         'QUOTE_EXPIRED',
-        'SWAP_EXPIRED'
+        'SWAP_EXPIRED',
+        'QUOTE_EXPIRED'
       ],
-      userAgent: [
-        'WALLET',
-        'UI'
-      ],
+      userAgent: ['WALLET', 'UI'],
       fromMarkets: [],
       toMarkets: [],
       markets: []
     }
   },
-  async created () {
+  async created() {
     const { data } = await agent.get('/api/swap/assetinfo')
 
     this.markets = data.map(data => data.code)
@@ -121,10 +183,16 @@ export default {
     this.toMarkets = [...this.markets]
   },
   methods: {
-    safeEmit () {
-      this.$emit('update', { status: this.status, from: this.fromMarkets, to: this.toMarkets, userAgent: this.userAgent, pending: this.pending })
+    safeEmit() {
+      this.$emit('update', {
+        status: this.status,
+        from: this.fromMarkets,
+        to: this.toMarkets,
+        userAgent: this.userAgent,
+        pending: this.pending
+      })
     },
-    setStatus (status) {
+    setStatus(status) {
       if (this.status.includes(status)) {
         if (this.status.length > 1) {
           this.status = this.status.filter(s => status !== s)
@@ -133,17 +201,17 @@ export default {
         this.status.push(status)
       }
     },
-    setPendingSwaps () {
+    setPendingSwaps() {
       this.status = ['USER_CLAIMED', 'AGENT_CONTRACT_FUNDED', 'AGENT_FUNDED']
     },
-    setPending (pending) {
+    setPending(pending) {
       if (this.pending.includes(pending)) {
         this.pending = this.pending.filter(s => pending !== s)
       } else {
         this.pending.push(pending)
       }
     },
-    setUserAgent (userAgent) {
+    setUserAgent(userAgent) {
       if (this.userAgent.includes(userAgent)) {
         if (this.userAgent.length > 1) {
           this.userAgent = this.userAgent.filter(s => userAgent !== s)
@@ -152,7 +220,7 @@ export default {
         this.userAgent.push(userAgent)
       }
     },
-    setMarket (market, direction) {
+    setMarket(market, direction) {
       const ref = direction === 'from' ? this.fromMarkets : this.toMarkets
 
       if (ref.includes(market)) {
@@ -189,8 +257,8 @@ export default {
     }
 
     &.active {
-      color: $primary!important;
-      background-color: transparent!important;
+      color: $primary !important;
+      background-color: transparent !important;
       font-weight: 500;
 
       &:after {
