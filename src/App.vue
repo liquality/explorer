@@ -8,6 +8,11 @@
           </router-link>
           <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
             <li class="nav-item">
+              <router-link to="/browse" class="nav-link" active-class="active">
+                Browse
+              </router-link>
+            </li>
+            <li class="nav-item">
               <router-link to="/markets" class="nav-link" active-class="active">
                 Markets
               </router-link>
@@ -15,11 +20,6 @@
             <li class="nav-item">
               <router-link to="/assets" class="nav-link" active-class="active">
                 Assets
-              </router-link>
-            </li>
-            <li class="nav-item">
-              <router-link to="/browse" class="nav-link" active-class="active">
-                Browse
               </router-link>
             </li>
             <li class="nav-item">
