@@ -27,7 +27,7 @@
             <td>{{ item.from }} - {{ item.to }}</td>
             <td class="text-center">{{ item.rate }}</td>
             <td class="text-center">{{ formatAmount(item.min, item.from, true) }} {{ item.from }}</td>
-            <td class="text-center">{{ formatAmount(item.max, item.from, true) }} {{ item.to }}</td>
+            <td class="text-center">{{ formatAmount(item.max, item.from, true) }} {{ item.from }}</td>
             <td class="text-right">{{ formatDurationStrict(item.updatedAt) }}</td>
           </tr>
         </tbody>
