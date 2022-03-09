@@ -13,6 +13,9 @@
               Balance
             </td>
             <td scope="col" class="text-muted text-center">
+              Address
+            </td>
+            <td scope="col" class="text-muted text-center">
               Min Conf
             </td>
             <td scope="col" class="text-muted text-right">Updated At</td>
@@ -22,7 +25,8 @@
         <tbody class="font-weight-normal" v-else>
           <tr v-for="item in assets" :key="item.code">
             <td>{{ item.code }}</td>
-            <td class="text-center">{{ formatAmount(item.actualBalance, item.code, true) }} {{ item.code }}</td>
+            <td class="text-center">{{ formatAmount(item.balance, item.code, true) }} {{ item.code }}</td>
+            <td class="text-center">{{ item.address }}</td>
             <td class="text-center">{{ item.minConf }}</td>
             <td class="text-right">{{ formatDurationStrict(item.updatedAt) }}</td>
           </tr>
