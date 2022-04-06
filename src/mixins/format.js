@@ -53,7 +53,7 @@ export default {
     },
     formatAssetValue(value, asset, trim = false) {
       if (trim) {
-        const prettyAmount = BN(value).dp(6, BN.ROUND_FLOOR)
+        const prettyAmount = BN(value).dp(8, BN.ROUND_FLOOR)
         const [n, d] = String(prettyAmount).split('.')
         return coinFormatter.format(Number(n)) + (d ? `.${d}` : '')
       }
