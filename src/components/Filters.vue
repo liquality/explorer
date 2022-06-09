@@ -25,7 +25,7 @@
       <span
         :class="{
           'nav-link': true,
-          active: status.every(s => ['USER_CLAIMED', 'AGENT_CONTRACT_FUNDED', 'AGENT_FUNDED'].includes(s))
+          active: status.every(s => ['USER_CLAIMED', 'AGENT_CONTRACT_FUNDED', 'AGENT_FUNDED','AGENT_APPROVED'].includes(s))
         }"
         @click="setPendingSwaps()"
         >Agent</span
@@ -62,6 +62,14 @@
 
     <nav class="nav flex-column mb-3">
       <span class="nav-link small">Agent</span>
+            <span
+        :class="{
+          'nav-link': true,
+          active: status.includes('AGENT_APPROVED')
+        }"
+        @click="setStatus('AGENT_APPROVED')"
+        >Agent Approved</span
+      >
       <span
         :class="{
           'nav-link': true,
@@ -167,7 +175,8 @@ export default {
         'AGENT_REFUNDED',
         'QUOTE_EXPIRED',
         'SWAP_EXPIRED',
-        'QUOTE_EXPIRED'
+        'QUOTE_EXPIRED',
+        'AGENT_APPROVED',
       ],
       userAgent: ['WALLET', 'UI'],
       fromMarkets: [],
